@@ -4,6 +4,21 @@ This is a web application written using the Phoenix web framework.
 
 - Use `mix precommit` alias when you are done with all changes and fix any pending issues
 - Use the already included and available `:req` (`Req`) library for HTTP requests, **avoid** `:httpoison`, `:tesla`, and `:httpc`. Req is included by default and is the preferred HTTP client for Phoenix apps
+
+### Internationalization (i18n) Guidelines
+
+- **CRITICAL**: **Never** use hardcoded text strings directly in React components or templates
+- **Always** use the i18n system with translation keys: `t("auth.signInTitle")` instead of `"Sign In"`
+- **Always** update translation schema files when adding new text content to pages
+- Before creating new components with text, first examine existing translation files to understand the schema structure and naming conventions
+- When adding new translation keys:
+  1. Find the translation schema files (typically in a translations or i18n directory)
+  2. Add the new keys following existing patterns and groupings (e.g., `auth.*` for authentication-related text)
+  3. Provide translations for all supported locales
+  4. Use the `getI18n(locale)` function to access translations in React components
+- Translation keys should be descriptive and hierarchical: `auth.checkEmailTitle` rather than `title1`
+- Support interpolation for dynamic content: `t("auth.checkEmailSubtitleWithEmail", { email })`
+
 ### Phoenix v1.8 guidelines
 
 - **Always** begin your LiveView templates with `<Layouts.app flash={@flash} ...>` which wraps all inner content

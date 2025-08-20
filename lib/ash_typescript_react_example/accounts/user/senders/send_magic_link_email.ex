@@ -30,11 +30,16 @@ defmodule AshTypescriptReactExample.Accounts.User.Senders.SendMagicLinkEmail do
   end
 
   defp body(params) do
-    # NOTE: You may have to change this to match your magic link acceptance URL.
+    # The link goes to our verify page which will auto-submit the token
+    sign_in_url = url(~p"/sign-in/verify?token=#{params[:token]}")
 
     """
-    <p>Hello, #{params[:email]}! Click this link to sign in:</p>
-    <p><a href="#{url(~p"/magic_link/#{params[:token]}")}">#{url(~p"/magic_link/#{params[:token]}")}</a></p>
+    <p>Hello, #{params[:email]}!</p>
+    <p>Click this link to sign in to your account:</p>
+    <p><a href="#{sign_in_url}" style="display: inline-block; padding: 10px 20px; background-color: #4F46E5; color: white; text-decoration: none; border-radius: 5px;">Sign In</a></p>
+    <p>Or copy and paste this link into your browser:</p>
+    <p style="word-break: break-all;">#{sign_in_url}</p>
+    <p>If you didn't request this email, you can safely ignore it.</p>
     """
   end
 end

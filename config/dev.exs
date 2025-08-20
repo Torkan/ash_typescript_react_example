@@ -26,24 +26,27 @@ config :ash_typescript_react_example, AshTypescriptReactExampleWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "cTbSmcnDIsQUfBiONrnTj+g7vPoVqAgJeDyfg0Q22yLZkLvEG8zWu4KFUnGivAcw",
   watchers: [
-    {Path.expand("../assets/watcher_wrapper", __DIR__), [
-      "bun",
-      "run",
-      "dev",
-      cd: Path.expand("../assets", __DIR__)
-    ]},
-    {Path.expand("../assets/watcher_wrapper", __DIR__), [
-      "bun",
-      "run",
-      "dev:build-ssr",
-      cd: Path.expand("../assets", __DIR__)
-    ]},
-    {Path.expand("../assets/watcher_wrapper", __DIR__), [
-      "bun",
-      "run",
-      "type-check:watch-colored",
-      cd: Path.expand("../assets", __DIR__)
-    ]}
+    {Path.expand("../assets/watcher_wrapper", __DIR__),
+     [
+       "bun",
+       "run",
+       "dev",
+       cd: Path.expand("../assets", __DIR__)
+     ]},
+    {Path.expand("../assets/watcher_wrapper", __DIR__),
+     [
+       "bun",
+       "run",
+       "dev:build-ssr",
+       cd: Path.expand("../assets", __DIR__)
+     ]},
+    {Path.expand("../assets/watcher_wrapper", __DIR__),
+     [
+       "bun",
+       "run",
+       "type-check:watch",
+       cd: Path.expand("../assets", __DIR__)
+     ]}
   ]
 
 # ## SSL Support

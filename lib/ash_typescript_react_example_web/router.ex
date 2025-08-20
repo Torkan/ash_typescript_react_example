@@ -14,6 +14,7 @@ defmodule AshTypescriptReactExampleWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :load_from_session
+    plug AshTypescriptReactExampleWeb.Plugs.Locale
   end
 
   pipeline :api do
@@ -26,6 +27,7 @@ defmodule AshTypescriptReactExampleWeb.Router do
     plug :browser
     plug AshTypescriptReactExampleWeb.Plugs.RequireUser
   end
+
 
   scope "/", AshTypescriptReactExampleWeb do
     pipe_through :browser
@@ -54,6 +56,9 @@ defmodule AshTypescriptReactExampleWeb.Router do
 
   scope "/", AshTypescriptReactExampleWeb do
     pipe_through :browser
+
+    # Session/locale routes
+    get "/session/set_locale", SessionController, :set_locale
 
     # Magic link authentication routes
     get "/sign-in", MagicLinkController, :new

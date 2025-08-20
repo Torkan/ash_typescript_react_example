@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { router } from '@inertiajs/react';
 import { getI18n } from '$lib/i18n';
+import MagicLinkLayout from '$lib/components/MagicLinkLayout';
 
 interface Props {
   token?: string;
@@ -37,72 +38,82 @@ export default function MagicLinkVerify({ token = "", errors = {}, flash = {}, l
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {t("auth.verifyTitle")}
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            {t("auth.verifyInstructions")}
-          </p>
-        </div>
-
-        {flash.error && (
-          <div className="rounded-md bg-red-50 p-4">
-            <div className="flex">
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">
-                  {flash.error}
-                </h3>
-              </div>
-            </div>
+    <MagicLinkLayout locale={locale}>
+      <div className="hero">
+        <div className="hero-content flex-col">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-base-content">
+              {t("auth.verifyTitle")}
+            </h1>
+            <p className="mt-4 text-base-content/70">
+              {t("auth.verifyInstructions")}
+            </p>
           </div>
-        )}
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="token" className="block text-sm font-medium text-gray-700">
-              {t("auth.magicLinkCode")}
-            </label>
-            <div className="mt-1">
-              <input
-                id="token"
-                name="token"
-                type="text"
-                required
-                value={tokenInput}
-                onChange={(e) => setTokenInput(e.target.value)}
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder={t("auth.magicLinkCodePlaceholder")}
-                disabled={processing}
-              />
-              {errors.token && (
-                <p className="mt-2 text-sm text-red-600">{errors.token}</p>
+          <div className="card w-full max-w-md bg-base-100 shadow-xl">
+            <div className="card-body">
+              {flash.error && (
+                <div className="alert alert-error mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <span>{flash.error}</span>
+                </div>
               )}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="form-control">
+                  <label className="label" htmlFor="token">
+                    <span className="label-text">{t("auth.magicLinkCode")}</span>
+                  </label>
+                  <input
+                    id="token"
+                    name="token"
+                    type="text"
+                    required
+                    value={tokenInput}
+                    onChange={(e) => setTokenInput(e.target.value)}
+                    className="input input-bordered input-primary w-full"
+                    placeholder={t("auth.magicLinkCodePlaceholder")}
+                    disabled={processing}
+                  />
+                  {errors.token && (
+                    <div className="label">
+                      <span className="label-text-alt text-error">
+                        {errors.token}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-control mt-6">
+                  <button
+                    type="submit"
+                    disabled={processing || !tokenInput}
+                    className={`btn btn-primary w-full ${processing ? "loading" : ""}`}
+                  >
+                    {processing ? (
+                      <>
+                        <span className="loading loading-spinner loading-sm"></span>
+                        {t("auth.verifying")}
+                      </>
+                    ) : (
+                      t("auth.verifyAndSignIn")
+                    )}
+                  </button>
+                </div>
+
+                <div className="text-center mt-4">
+                  <a
+                    href="/sign-in"
+                    className="link link-primary text-sm"
+                  >
+                    {t("auth.requestNewLink")}
+                  </a>
+                </div>
+              </form>
             </div>
           </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={processing || !tokenInput}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {processing ? t("auth.verifying") : t("auth.verifyAndSignIn")}
-            </button>
-          </div>
-
-          <div className="text-center">
-            <a
-              href="/sign-in"
-              className="text-indigo-600 hover:text-indigo-500 text-sm"
-            >
-              {t("auth.requestNewLink")}
-            </a>
-          </div>
-        </form>
+        </div>
       </div>
-    </div>
+    </MagicLinkLayout>
   );
 }
