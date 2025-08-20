@@ -24,15 +24,17 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       },
     },
     server: {
-      watch: [
-        "../lib/ash_typescript_react_example_web/**/*.ex",
-        {
-          // Watch for new files in pages directory
-          ignored: ["!**/js/pages/**/*.tsx", "!**/js/pages/**/*.jsx"],
-        },
-      ],
+      watch: {
+        // Watch for changes in Phoenix files
+        ignored: [
+          "!../lib/ash_typescript_react_example_web/**/*.ex",
+          "!**/js/pages/**/*.tsx",
+          "!**/js/pages/**/*.jsx",
+        ],
+      },
       // Port for Vite dev server
-      strictPort: 5173,
+      port: 5173,
+      strictPort: true,
       // Enable HMR
       hmr: {
         port: 5173,
