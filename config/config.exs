@@ -7,9 +7,49 @@
 # General application configuration
 import Config
 
+config :ash,
+  allow_forbidden_field_for_relationships_by_default?: true,
+  include_embedded_source_by_default?: false,
+  show_keysets_for_all_actions?: false,
+  default_page_type: :keyset,
+  policies: [no_filter_static_forbidden_reads?: false],
+  keep_read_action_loads_when_loading?: false,
+  default_actions_require_atomic?: true,
+  read_action_after_action_hooks_in_order?: true,
+  bulk_actions_default_to_errors?: true
+
+config :spark,
+  formatter: [
+    remove_parens?: true,
+    "Ash.Resource": [
+      section_order: [
+        :authentication,
+        :tokens,
+        :postgres,
+        :resource,
+        :code_interface,
+        :actions,
+        :policies,
+        :pub_sub,
+        :preparations,
+        :changes,
+        :validations,
+        :multitenancy,
+        :attributes,
+        :relationships,
+        :calculations,
+        :aggregates,
+        :identities
+      ]
+    ],
+    "Ash.Domain": [section_order: [:resources, :policies, :authorization, :domain, :execution]]
+  ]
+
 config :ash_typescript_react_example,
   ecto_repos: [AshTypescriptReactExample.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime],
+  ash_domains: [AshTypescriptReactExample.Accounts],
+  env: Mix.env()
 
 # Configures the endpoint
 config :ash_typescript_react_example, AshTypescriptReactExampleWeb.Endpoint,
@@ -35,27 +75,6 @@ config :ash_typescript_react_example, AshTypescriptReactExampleWeb.Endpoint,
 config :ash_typescript_react_example, AshTypescriptReactExample.Mailer,
   adapter: Swoosh.Adapters.Local
 
-# Configure esbuild (the version is required)
-config :esbuild,
-  version: "0.25.4",
-  ash_typescript_react_example: [
-    args:
-      ~w(js/app.js --bundle --target=es2022 --outdir=../priv/static/assets/js --external:/fonts/* --external:/images/* --alias:@=.),
-    cd: Path.expand("../assets", __DIR__),
-    env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
-  ]
-
-# Configure tailwind (the version is required)
-config :tailwind,
-  version: "4.1.7",
-  ash_typescript_react_example: [
-    args: ~w(
-      --input=assets/css/app.css
-      --output=priv/static/assets/css/app.css
-    ),
-    cd: Path.expand("..", __DIR__)
-  ]
-
 # Configures Elixir's Logger
 config :logger, :default_formatter,
   format: "$time $metadata[$level] $message\n",
@@ -63,6 +82,43 @@ config :logger, :default_formatter,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+config :inertia,
+  # The Phoenix Endpoint module for your application. This is used for building
+  # asset URLs to compute a unique version hash to track when something has
+  # changed (and a reload is required on the frontend).
+  endpoint: AshTypescriptReactExampleWeb.Endpoint,
+
+  # An optional list of static file paths to track for changes. You'll generally
+  # want to include any JavaScript assets that may require a page refresh when
+  # modified.
+  static_paths: ["/assets/app.jsx"],
+
+  # The default version string to use (if you decide not to track any static
+  # assets using the `static_paths` config). Defaults to "1".
+  default_version: "1",
+
+  # Enable automatic conversion of prop keys from snake case (e.g. `inserted_at`),
+  # which is conventional in Elixir, to camel case (e.g. `insertedAt`), which is
+  # conventional in JavaScript. Defaults to `false`.
+  camelize_props: false,
+
+  # Instruct the client side whether to encrypt the page object in the window history
+  # state. This can also be set/overridden on a per-request basis, using the `encrypt_history`
+  # controller helper. Defaults to `false`.
+  history: [encrypt: false],
+
+  # Enable server-side rendering for page responses (requires some additional setup,
+  # see instructions below). Defaults to `false`.
+  ssr: false,
+
+  # Whether to raise an exception when server-side rendering fails (only applies
+  # when SSR is enabled). Defaults to `true`.
+  #
+  # Recommended: enable in non-production environments and disable in production,
+  # so that SSR failures will not cause 500 errors (but instead will fallback to
+  # CSR).
+  raise_on_ssr_failure: config_env() != :prod
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

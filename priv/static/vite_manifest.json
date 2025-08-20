@@ -1,0 +1,16 @@
+{
+  "css/app.css": {
+    "file": "assets/styles.NYuPdhM_.css",
+    "src": "css/app.css",
+    "isEntry": true,
+    "names": [
+      "styles.css"
+    ]
+  },
+  "js/app.tsx": {
+    "file": "assets/app.D81LZ4Pn.js",
+    "name": "app",
+    "src": "js/app.tsx",
+    "isEntry": true
+  }
+}

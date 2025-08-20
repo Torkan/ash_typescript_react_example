@@ -10,12 +10,14 @@ defmodule AshTypescriptReactExample.Application do
     children = [
       AshTypescriptReactExampleWeb.Telemetry,
       AshTypescriptReactExample.Repo,
-      {DNSCluster, query: Application.get_env(:ash_typescript_react_example, :dns_cluster_query) || :ignore},
+      {DNSCluster,
+       query: Application.get_env(:ash_typescript_react_example, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: AshTypescriptReactExample.PubSub},
       # Start a worker by calling: AshTypescriptReactExample.Worker.start_link(arg)
       # {AshTypescriptReactExample.Worker, arg},
       # Start to serve requests, typically the last entry
-      AshTypescriptReactExampleWeb.Endpoint
+      AshTypescriptReactExampleWeb.Endpoint,
+      {AshAuthentication.Supervisor, [otp_app: :ash_typescript_react_example]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

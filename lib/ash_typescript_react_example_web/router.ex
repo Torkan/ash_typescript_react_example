@@ -1,23 +1,68 @@
 defmodule AshTypescriptReactExampleWeb.Router do
   use AshTypescriptReactExampleWeb, :router
 
+  use AshAuthentication.Phoenix.Router
+
+  import AshAuthentication.Plug.Helpers
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
+    plug Inertia.Plug
     plug :put_root_layout, html: {AshTypescriptReactExampleWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :load_from_session
   end
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug :load_from_bearer
+    plug :set_actor, :user
+  end
+
+  pipeline :user do
+    plug :browser
+    plug AshTypescriptReactExampleWeb.Plugs.RequireUser
   end
 
   scope "/", AshTypescriptReactExampleWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    ash_authentication_live_session :authenticated_routes do
+      # in each liveview, add one of the following at the top of the module:
+      #
+      # If an authenticated user must be present:
+      # on_mount {AshTypescriptReactExampleWeb.LiveUserAuth, :live_user_required}
+      #
+      # If an authenticated user *may* be present:
+      # on_mount {AshTypescriptReactExampleWeb.LiveUserAuth, :live_user_optional}
+      #
+      # If an authenticated user must *not* be present:
+      # on_mount {AshTypescriptReactExampleWeb.LiveUserAuth, :live_no_user}
+    end
+  end
+
+  scope "/", AshTypescriptReactExampleWeb do
+    pipe_through :user
+
+    get "/", PageController, :index
+    post "/rpc/run", RpcController, :run
+    post "/rpc/validate", RpcController, :validate
+  end
+
+  scope "/", AshTypescriptReactExampleWeb do
+    pipe_through :browser
+
+    # Magic link authentication routes
+    get "/sign-in", MagicLinkController, :new
+    post "/sign-in", MagicLinkController, :create
+    get "/sign-in/check-email", MagicLinkController, :check_email
+    get "/sign-in/verify", MagicLinkController, :verify
+    post "/sign-in/verify", MagicLinkController, :verify_token
+
+    auth_routes AuthController, AshTypescriptReactExample.Accounts.User, path: "/auth"
   end
 
   # Other scopes may use custom stacks.

@@ -1,0 +1,4 @@
+[tools]
+elixir = "1.19.0-rc.0-otp-27"
+erlang = "27.3.3"
+bun = "1.2.18"

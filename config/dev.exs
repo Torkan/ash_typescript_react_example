@@ -1,4 +1,5 @@
 import Config
+config :ash, policies: [show_policy_breakdowns?: true]
 
 # Configure your database
 config :ash_typescript_react_example, AshTypescriptReactExample.Repo,
@@ -25,9 +26,24 @@ config :ash_typescript_react_example, AshTypescriptReactExampleWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "cTbSmcnDIsQUfBiONrnTj+g7vPoVqAgJeDyfg0Q22yLZkLvEG8zWu4KFUnGivAcw",
   watchers: [
-    esbuild:
-      {Esbuild, :install_and_run, [:ash_typescript_react_example, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:ash_typescript_react_example, ~w(--watch)]}
+    {Path.expand("../assets/watcher_wrapper", __DIR__), [
+      "bun",
+      "run",
+      "dev",
+      cd: Path.expand("../assets", __DIR__)
+    ]},
+    {Path.expand("../assets/watcher_wrapper", __DIR__), [
+      "bun",
+      "run",
+      "dev:build-ssr",
+      cd: Path.expand("../assets", __DIR__)
+    ]},
+    {Path.expand("../assets/watcher_wrapper", __DIR__), [
+      "bun",
+      "run",
+      "type-check:watch-colored",
+      cd: Path.expand("../assets", __DIR__)
+    ]}
   ]
 
 # ## SSL Support
@@ -65,7 +81,9 @@ config :ash_typescript_react_example, AshTypescriptReactExampleWeb.Endpoint,
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :ash_typescript_react_example, dev_routes: true
+config :ash_typescript_react_example,
+  dev_routes: true,
+  token_signing_secret: "7Ymzna76f6o+MqRP9Fgijf2zXjGO95EO"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"

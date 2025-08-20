@@ -1,0 +1,48 @@
+{
+  "name": "ash-typescript-react-example",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch",
+    "type-check:watch-colored": "./scripts/type-check-colored.sh",
+    "preview": "vite preview",
+    "dev": "vite --config vite.config.ts",
+    "build": "bun run type-check && vite build --config vite.config.ts",
+    "build-ssr": "bun run type-check && vite build --ssr --config vite.ssr.config.ts",
+    "dev:build": "vite build --mode development --watch --config vite.config.ts",
+    "dev:build-ssr": "vite build --mode development --ssr --watch --config vite.ssr.config.ts",
+    "dev-check:build": "bun run type-check && vite build --mode development --config vite.config.ts",
+    "dev-check:build-ssr": "bun run type-check && vite build --mode development --ssr --config vite.ssr.config.ts"
+  },
+  "dependencies": {
+    "@inertiajs/react": "^2.0.14",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "phoenix": "workspace:*",
+    "phoenix_html": "workspace:*",
+    "phoenix_live_view": "workspace:*",
+    "tailwindcss": "^4.1.11"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/vite": "^4.1.11",
+    "@types/node": "^22.13.1",
+    "@types/phoenix": "^1.6.6",
+    "@types/phoenix_live_view": "^1.0.0",
+    "daisyui": "^5.0.46",
+    "globals": "^15.14.0",
+    "typescript": "~5.6.2",
+    "typescript-eslint": "^8.18.2",
+    "vite": "^7.0.2"
+  },
+  "workspaces": [
+    "../deps/*"
+  ]
+}

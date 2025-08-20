@@ -151,4 +151,6 @@ defmodule AshTypescriptReactExampleWeb.Layouts do
     </div>
     """
   end
+
+  def dev_env?, do: Application.get_env(:ash_typescript_react_example, :env) == :dev
 end

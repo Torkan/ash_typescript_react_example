@@ -1,4 +1,7 @@
 import Config
+config :ash_typescript_react_example, token_signing_secret: "ee8H8Nv9BVoTRHolasukw2OFmGJ88kTZ"
+config :bcrypt_elixir, log_rounds: 1
+config :ash, policies: [show_policy_breakdowns?: true], disable_async?: true
 
 # Configure your database
 #

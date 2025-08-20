@@ -4,33 +4,32 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <.live_title default="AshTypescriptReactExample" suffix=" · Phoenix Framework">
-      {assigns[:page_title]}
-    </.live_title>
-    <link phx-track-static rel="stylesheet" href={~p"/assets/css/app.css"} />
-    <script defer phx-track-static type="text/javascript" src={~p"/assets/js/app.js"}>
-    </script>
-    <script>
-      (() => {
-        const setTheme = (theme) => {
-          if (theme === "system") {
-            localStorage.removeItem("phx:theme");
-            document.documentElement.removeAttribute("data-theme");
-          } else {
-            localStorage.setItem("phx:theme", theme);
-            document.documentElement.setAttribute("data-theme", theme);
-          }
-        };
-        if (!document.documentElement.hasAttribute("data-theme")) {
-          setTheme(localStorage.getItem("phx:theme") || "system");
-        }
-        window.addEventListener("storage", (e) => e.key === "phx:theme" && setTheme(e.newValue || "system"));
-        
-        window.addEventListener("phx:set-theme", (e) => setTheme(e.target.dataset.phxTheme));
-      })();
-    </script>
+    <.inertia_title>{assigns[:page_title]}</.inertia_title>
+    <.inertia_head content={@inertia_head} />
+
+    <%= if dev_env?() do %>
+      <!-- Development: Use Vite dev server -->
+      <script type="module">
+        import RefreshRuntime from 'http://localhost:5173/@react-refresh'
+        RefreshRuntime.injectIntoGlobalHook(window)
+        window.$RefreshReg$ = () => {}
+        window.$RefreshSig$ = () => (type) => type
+        window.__vite_plugin_react_preamble_installed__ = true
+      </script>
+      <script type="module" src="http://localhost:5173/@vite/client">
+      </script>
+      <script type="module" src="http://localhost:5173/js/app.jsx">
+      </script>
+      <script type="module" src="http://localhost:5173/css/app.css">
+      </script>
+    <% else %>
+      <!-- Production: Use built assets -->
+      <link phx-track-static rel="stylesheet" href={~p"/assets/styles.css"} />
+      <script type="module" crossorigin defer phx-track-static src={Vite.Manifest.main_js()}>
+      </script>
+    <% end %>
   </head>
-  <body>
+  <body class="bg-gray-300">
     {@inner_content}
   </body>
 </html>
