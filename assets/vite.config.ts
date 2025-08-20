@@ -2,7 +2,7 @@ import react from "@vitejs/plugin-react";
 import path from "node:path";
 import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
-import type { Plugin, ConfigEnv } from "vite";
+import type { ConfigEnv } from "vite";
 
 export default defineConfig(({ mode }: ConfigEnv) => {
   const isDev = mode === "development";
