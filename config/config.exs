@@ -48,7 +48,7 @@ config :spark,
 config :ash_typescript_react_example,
   ecto_repos: [AshTypescriptReactExample.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [AshTypescriptReactExample.Accounts],
+  ash_domains: [AshTypescriptReactExample.Accounts, AshTypescriptReactExample.Invoicing],
   env: Mix.env()
 
 # Configures the endpoint

@@ -50,6 +50,7 @@ defmodule AshTypescriptReactExample.MixProject do
       {:ash_postgres, "~> 2.0"},
       {:ash_phoenix, "~> 2.0"},
       {:ash, "~> 3.5", override: true},
+      {:ash_state_machine, "~> 0.2"},
       {:ash_typescript, path: "../ash_typescript"},
       {:igniter, "~> 0.6", only: [:dev, :test]},
       {:phoenix, "~> 1.8.0"},
