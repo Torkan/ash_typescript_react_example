@@ -14,13 +14,32 @@ interface CompaniesPageProps {
   page_title: string;
 }
 
+// Helper function to fetch companies with proper typing
+async function fetchCompanies() {
+  return await listCompanies({
+    fields: [
+      "id",
+      "name",
+      "addressLine1",
+      "addressLine2",
+      "city",
+      "postalCode",
+      "country",
+      "vatNumber",
+      "email",
+      "phone",
+      "isDefault",
+    ],
+    headers: buildCSRFHeaders(),
+  });
+}
+
 export default function Companies({ current_user_id }: CompaniesPageProps) {
-  const [companies, setCompanies] = useState<CompanyResourceSchema[]>([]);
+  const [companies, setCompanies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [editingCompany, setEditingCompany] =
-    useState<CompanyResourceSchema | null>(null);
+  const [editingCompany, setEditingCompany] = useState<any | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     addressLine1: "",
@@ -41,22 +60,7 @@ export default function Companies({ current_user_id }: CompaniesPageProps) {
   const loadCompanies = async () => {
     try {
       setLoading(true);
-      const result = await listCompanies({
-        fields: [
-          "id",
-          "name",
-          "addressLine1",
-          "addressLine2",
-          "city",
-          "postalCode",
-          "country",
-          "vatNumber",
-          "email",
-          "phone",
-          "isDefault",
-        ],
-        headers: buildCSRFHeaders(),
-      });
+      const result = await fetchCompanies();
       if (result.success) {
         setCompanies(result.data);
       } else {
@@ -102,7 +106,7 @@ export default function Companies({ current_user_id }: CompaniesPageProps) {
     }
   };
 
-  const handleEdit = (company: CompanyResourceSchema) => {
+  const handleEdit = (company: Company) => {
     setEditingCompany(company);
     setFormData({
       name: company.name,
