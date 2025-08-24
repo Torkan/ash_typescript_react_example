@@ -148,6 +148,7 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
     update :finalize do
       # Transition credit note to finalized state and assign serial number
       accept []
+      require_atomic? false
 
       change fn changeset, _context ->
         user_id = Ash.Changeset.get_attribute(changeset, :user_id)
@@ -187,7 +188,6 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
 
             changeset
             |> Ash.Changeset.change_attribute(:serial_number, serial_number)
-            |> Ash.Changeset.change_attribute(:state, :finalized)
 
           {:error, error} ->
             Ash.Changeset.add_error(
@@ -201,10 +201,9 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
     update :cancel do
       # Transition credit note to cancelled state
       accept []
+      require_atomic? false
 
-      change fn changeset, _context ->
-        Ash.Changeset.change_attribute(changeset, :state, :cancelled)
-      end
+      # State machine will handle the state transition automatically
     end
   end
 
@@ -224,7 +223,7 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
   end
 
   validations do
-    # Only draft credit notes can be updated
+    # Only draft credit notes can be updated (finalize and cancel have their own logic)
     validate attribute_in(:state, [:draft]),
       message: "can only update draft credit notes",
       on: [:update]

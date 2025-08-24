@@ -17,7 +17,8 @@ defmodule AshTypescriptReactExample.Repo.Migrations.CreateInvoicingTables do
             name: "sequence_numbers_user_id_fkey",
             type: :uuid,
             prefix: "public"
-          ), null: false
+          ),
+          null: false
 
       add :document_type, :text, null: false
       add :next_number, :bigint, null: false, default: 1
@@ -30,8 +31,6 @@ defmodule AshTypescriptReactExample.Repo.Migrations.CreateInvoicingTables do
         null: false,
         default: fragment("(now() AT TIME ZONE 'utc')")
     end
-
-    create index(:sequence_numbers, [:user_id, :document_type], unique: true)
 
     create unique_index(:sequence_numbers, [:user_id, :document_type],
              name: "sequence_numbers_unique_user_document_type_index"
@@ -46,7 +45,8 @@ defmodule AshTypescriptReactExample.Repo.Migrations.CreateInvoicingTables do
             name: "invoices_user_id_fkey",
             type: :uuid,
             prefix: "public"
-          ), null: false
+          ),
+          null: false
 
       add :serial_number, :text
       add :state, :text, null: false, default: "draft"
@@ -88,8 +88,6 @@ defmodule AshTypescriptReactExample.Repo.Migrations.CreateInvoicingTables do
 
     create index(:invoices, [:user_id, :issue_date])
 
-    create index(:invoices, [:user_id, :serial_number])
-
     create index(:invoices, [:user_id, :state])
 
     create index(:invoices, [:user_id])
@@ -103,7 +101,8 @@ defmodule AshTypescriptReactExample.Repo.Migrations.CreateInvoicingTables do
             name: "invoice_lines_invoice_id_fkey",
             type: :uuid,
             prefix: "public"
-          ), null: false
+          ),
+          null: false
 
       add :line_number, :bigint, null: false
       add :description, :text, null: false
@@ -137,7 +136,8 @@ defmodule AshTypescriptReactExample.Repo.Migrations.CreateInvoicingTables do
             name: "customers_user_id_fkey",
             type: :uuid,
             prefix: "public"
-          ), null: false
+          ),
+          null: false
 
       add :name, :text, null: false
       add :address_line_1, :text, null: false
@@ -172,7 +172,8 @@ defmodule AshTypescriptReactExample.Repo.Migrations.CreateInvoicingTables do
             name: "credit_notes_user_id_fkey",
             type: :uuid,
             prefix: "public"
-          ), null: false
+          ),
+          null: false
 
       add :serial_number, :text
       add :state, :text, null: false, default: "draft"
@@ -225,8 +226,6 @@ defmodule AshTypescriptReactExample.Repo.Migrations.CreateInvoicingTables do
 
     create index(:credit_notes, [:user_id, :issue_date])
 
-    create index(:credit_notes, [:user_id, :serial_number])
-
     create index(:credit_notes, [:user_id, :state])
 
     create index(:credit_notes, [:user_id])
@@ -240,7 +239,8 @@ defmodule AshTypescriptReactExample.Repo.Migrations.CreateInvoicingTables do
             name: "credit_note_lines_credit_note_id_fkey",
             type: :uuid,
             prefix: "public"
-          ), null: false
+          ),
+          null: false
 
       add :line_number, :bigint, null: false
       add :description, :text, null: false
@@ -274,7 +274,8 @@ defmodule AshTypescriptReactExample.Repo.Migrations.CreateInvoicingTables do
             name: "companies_user_id_fkey",
             type: :uuid,
             prefix: "public"
-          ), null: false
+          ),
+          null: false
 
       add :name, :text, null: false
       add :address_line_1, :text, null: false
