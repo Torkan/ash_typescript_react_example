@@ -2,10 +2,10 @@ defmodule AshTypescriptReactExampleWeb.Plugs.SetAshTenant do
   @moduledoc """
   Plug to set the Ash tenant based on the current authenticated user.
   """
-  
+
   import Plug.Conn
   import Phoenix.Controller, only: [redirect: 2, put_flash: 3]
-  
+
   alias Ash.PlugHelpers
 
   def init(opts), do: opts

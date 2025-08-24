@@ -77,6 +77,10 @@ defmodule AshTypescriptReactExample.Invoicing.Company do
       # Get the default company for a user
       filter expr(is_default == true)
     end
+
+    read :get_by_id do
+      get_by [:id]
+    end
   end
 
   policies do
@@ -96,7 +100,7 @@ defmodule AshTypescriptReactExample.Invoicing.Company do
 
   validations do
     validate match(:email, ~r/.+@.+\..+/),
-      message: "must be a valid email address",
+      message: "invalid_email",
       on: [:create, :update]
   end
 
@@ -133,6 +137,7 @@ defmodule AshTypescriptReactExample.Invoicing.Company do
     belongs_to :user, AshTypescriptReactExample.Accounts.User do
       allow_nil? false
       attribute_writable? false
+      public? true
     end
   end
 end

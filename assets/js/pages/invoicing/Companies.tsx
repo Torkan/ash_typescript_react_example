@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "@inertiajs/react";
 import {
   listCompanies,
-  createCompany,
-  updateCompany,
   deleteCompany,
   buildCSRFHeaders,
-  type CompanyResourceSchema,
+  InferListCompaniesResult,
+  ListCompaniesFields,
 } from "../../ash_rpc";
 
 interface CompaniesPageProps {
@@ -14,44 +14,35 @@ interface CompaniesPageProps {
   page_title: string;
 }
 
+const companyFields = [
+  "id",
+  "name",
+  "addressLine1",
+  "addressLine2",
+  "city",
+  "postalCode",
+  "country",
+  "vatNumber",
+  "email",
+  "phone",
+  "isDefault",
+] satisfies ListCompaniesFields;
+
 // Helper function to fetch companies with proper typing
 async function fetchCompanies() {
   return await listCompanies({
-    fields: [
-      "id",
-      "name",
-      "addressLine1",
-      "addressLine2",
-      "city",
-      "postalCode",
-      "country",
-      "vatNumber",
-      "email",
-      "phone",
-      "isDefault",
-    ],
+    fields: companyFields,
     headers: buildCSRFHeaders(),
   });
 }
 
-export default function Companies({ current_user_id }: CompaniesPageProps) {
-  const [companies, setCompanies] = useState<any[]>([]);
+export default function Companies({}: CompaniesPageProps) {
+  const [companies, setCompanies] = useState<
+    InferListCompaniesResult<typeof companyFields>
+  >([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [editingCompany, setEditingCompany] = useState<any | null>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    addressLine1: "",
-    addressLine2: "",
-    city: "",
-    postalCode: "",
-    country: "Norway",
-    vatNumber: "",
-    email: "",
-    phone: "",
-    isDefault: false,
-  });
 
   useEffect(() => {
     loadCompanies();
@@ -75,54 +66,6 @@ export default function Companies({ current_user_id }: CompaniesPageProps) {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (editingCompany) {
-        const result = await updateCompany({
-          primaryKey: editingCompany.id,
-          input: formData,
-          fields: ["id"],
-          headers: buildCSRFHeaders(),
-        });
-        if (!result.success) {
-          throw new Error(result.errors.map((e) => e.message).join(", "));
-        }
-      } else {
-        const result = await createCompany({
-          input: formData,
-          fields: ["id"],
-          headers: buildCSRFHeaders(),
-        });
-        if (!result.success) {
-          throw new Error(result.errors.map((e) => e.message).join(", "));
-        }
-      }
-      await loadCompanies();
-      resetForm();
-    } catch (err) {
-      setError("Failed to save company");
-      console.error(err);
-    }
-  };
-
-  const handleEdit = (company: Company) => {
-    setEditingCompany(company);
-    setFormData({
-      name: company.name,
-      addressLine1: company.addressLine1,
-      addressLine2: company.addressLine2 || "",
-      city: company.city,
-      postalCode: company.postalCode,
-      country: company.country,
-      vatNumber: company.vatNumber || "",
-      email: company.email || "",
-      phone: company.phone || "",
-      isDefault: company.isDefault,
-    });
-    setShowForm(true);
-  };
-
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this company?")) {
       try {
@@ -141,23 +84,6 @@ export default function Companies({ current_user_id }: CompaniesPageProps) {
     }
   };
 
-  const resetForm = () => {
-    setShowForm(false);
-    setEditingCompany(null);
-    setFormData({
-      name: "",
-      addressLine1: "",
-      addressLine2: "",
-      city: "",
-      postalCode: "",
-      country: "Norway",
-      vatNumber: "",
-      email: "",
-      phone: "",
-      isDefault: false,
-    });
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -170,194 +96,17 @@ export default function Companies({ current_user_id }: CompaniesPageProps) {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Companies</h1>
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+        <Link
+          href="/companies/new"
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded inline-block"
         >
           Add Company
-        </button>
+        </Link>
       </div>
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
-        </div>
-      )}
-
-      {showForm && (
-        <div className="bg-white shadow rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">
-            {editingCompany ? "Edit Company" : "New Company"}
-          </h2>
-          <form
-            onSubmit={handleSubmit}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Company Name *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Address Line 1 *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.addressLine1}
-                onChange={(e) =>
-                  setFormData({ ...formData, addressLine1: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Address Line 2
-              </label>
-              <input
-                type="text"
-                value={formData.addressLine2}
-                onChange={(e) =>
-                  setFormData({ ...formData, addressLine2: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                City *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.city}
-                onChange={(e) =>
-                  setFormData({ ...formData, city: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Postal Code *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.postalCode}
-                onChange={(e) =>
-                  setFormData({ ...formData, postalCode: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Country *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.country}
-                onChange={(e) =>
-                  setFormData({ ...formData, country: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                VAT Number
-              </label>
-              <input
-                type="text"
-                value={formData.vatNumber}
-                onChange={(e) =>
-                  setFormData({ ...formData, vatNumber: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone
-              </label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="isDefault"
-                checked={formData.isDefault}
-                onChange={(e) =>
-                  setFormData({ ...formData, isDefault: e.target.checked })
-                }
-                className="mr-2"
-              />
-              <label
-                htmlFor="isDefault"
-                className="text-sm font-medium text-gray-700"
-              >
-                Set as default company
-              </label>
-            </div>
-
-            <div className="md:col-span-2 flex gap-2">
-              <button
-                type="submit"
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-              >
-                {editingCompany ? "Update" : "Create"} Company
-              </button>
-              <button
-                type="button"
-                onClick={resetForm}
-                className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
         </div>
       )}
 
@@ -384,12 +133,12 @@ export default function Companies({ current_user_id }: CompaniesPageProps) {
               {company.phone && <p>Phone: {company.phone}</p>}
             </div>
             <div className="mt-4 flex gap-2">
-              <button
-                onClick={() => handleEdit(company)}
+              <Link
+                href={`/companies/${company.id}`}
                 className="text-blue-600 hover:text-blue-800 text-sm font-medium"
               >
                 Edit
-              </button>
+              </Link>
               <button
                 onClick={() => handleDelete(company.id)}
                 className="text-red-600 hover:text-red-800 text-sm font-medium"
@@ -401,7 +150,7 @@ export default function Companies({ current_user_id }: CompaniesPageProps) {
         ))}
       </div>
 
-      {companies.length === 0 && !showForm && (
+      {companies.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           No companies found. Click "Add Company" to create your first company.
         </div>

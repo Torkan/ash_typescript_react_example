@@ -65,7 +65,10 @@ IO.puts("✅ Got user: #{user.email}")
       email: "billing@acme.com",
       phone: "+47 22 00 00 00",
       is_default: true
-    }, tenant: user.id, actor: user)
+    },
+    tenant: user.id,
+    actor: user
+  )
   |> Ash.create()
 
 {:ok, second_company} =
@@ -82,7 +85,10 @@ IO.puts("✅ Got user: #{user.email}")
       email: "invoices@nordictechsolutions.com",
       phone: "+47 55 00 00 00",
       is_default: false
-    }, tenant: user.id, actor: user)
+    },
+    tenant: user.id,
+    actor: user
+  )
   |> Ash.create()
 
 IO.puts("✅ Created companies: #{default_company.name}, #{second_company.name}")
@@ -101,7 +107,10 @@ IO.puts("✅ Created companies: #{default_company.name}, #{second_company.name}"
       vat_number: "SE556123456701",
       email: "accounts@techstart.se",
       phone: "+46 8 123 456 78"
-    }, tenant: user.id, actor: user)
+    },
+    tenant: user.id,
+    actor: user
+  )
   |> Ash.create()
 
 {:ok, customer2} =
@@ -118,7 +127,10 @@ IO.puts("✅ Created companies: #{default_company.name}, #{second_company.name}"
       vat_number: "DK12345678",
       email: "billing@financeflow.dk",
       phone: "+45 33 12 34 56"
-    }, tenant: user.id, actor: user)
+    },
+    tenant: user.id,
+    actor: user
+  )
   |> Ash.create()
 
 {:ok, customer3} =
@@ -133,7 +145,10 @@ IO.puts("✅ Created companies: #{default_company.name}, #{second_company.name}"
       country: "Norway",
       email: "consultant@individual.no",
       phone: "+47 73 00 00 00"
-    }, tenant: user.id, actor: user)
+    },
+    tenant: user.id,
+    actor: user
+  )
   |> Ash.create()
 
 IO.puts("✅ Created customers: #{customer1.name}, #{customer2.name}, #{customer3.name}")
@@ -165,7 +180,10 @@ IO.puts("✅ Created customers: #{customer1.name}, #{customer2.name}, #{customer
       customer_email: customer1.email,
       customer_phone: customer1.phone,
       currency: "NOK"
-    }, tenant: user.id, actor: user)
+    },
+    tenant: user.id,
+    actor: user
+  )
   |> Ash.create()
 
 # Add lines to draft invoice
@@ -180,7 +198,9 @@ IO.puts("✅ Created customers: #{customer1.name}, #{customer2.name}, #{customer
       quantity: Decimal.new("40.0"),
       unit_price: Decimal.new("1250.00"),
       tax_rate: Decimal.new("25.0")
-    }, actor: user)
+    },
+    actor: user
+  )
   |> Ash.create()
 
 {:ok, _line2} =
@@ -194,7 +214,9 @@ IO.puts("✅ Created customers: #{customer1.name}, #{customer2.name}, #{customer
       quantity: Decimal.new("32.0"),
       unit_price: Decimal.new("1400.00"),
       tax_rate: Decimal.new("25.0")
-    }, actor: user)
+    },
+    actor: user
+  )
   |> Ash.create()
 
 {:ok, _line3} =
@@ -208,7 +230,9 @@ IO.puts("✅ Created customers: #{customer1.name}, #{customer2.name}, #{customer
       quantity: Decimal.new("8.0"),
       unit_price: Decimal.new("1600.00"),
       tax_rate: Decimal.new("25.0")
-    }, actor: user)
+    },
+    actor: user
+  )
   |> Ash.create()
 
 IO.puts("✅ Created draft invoice with 3 lines")
@@ -240,7 +264,10 @@ IO.puts("✅ Created draft invoice with 3 lines")
       customer_email: customer2.email,
       customer_phone: customer2.phone,
       currency: "NOK"
-    }, tenant: user.id, actor: user)
+    },
+    tenant: user.id,
+    actor: user
+  )
   |> Ash.create()
 
 # Add lines to finalized invoice
@@ -255,7 +282,9 @@ IO.puts("✅ Created draft invoice with 3 lines")
       quantity: Decimal.new("16.0"),
       unit_price: Decimal.new("1800.00"),
       tax_rate: Decimal.new("25.0")
-    }, actor: user)
+    },
+    actor: user
+  )
   |> Ash.create()
 
 {:ok, _line2} =
@@ -269,7 +298,9 @@ IO.puts("✅ Created draft invoice with 3 lines")
       quantity: Decimal.new("12.0"),
       unit_price: Decimal.new("1200.00"),
       tax_rate: Decimal.new("25.0")
-    }, actor: user)
+    },
+    actor: user
+  )
   |> Ash.create()
 
 # Finalize the invoice (this should assign a serial number)
@@ -308,7 +339,10 @@ IO.puts("✅ Created and finalized invoice: #{finalized_invoice.serial_number}")
       customer_email: finalized_invoice.customer_email,
       customer_phone: finalized_invoice.customer_phone,
       currency: finalized_invoice.currency
-    }, tenant: user.id, actor: user)
+    },
+    tenant: user.id,
+    actor: user
+  )
   |> Ash.create()
 
 # Add line to credit note (partial credit)
@@ -323,7 +357,9 @@ IO.puts("✅ Created and finalized invoice: #{finalized_invoice.serial_number}")
       quantity: Decimal.new("4.0"),
       unit_price: Decimal.new("1200.00"),
       tax_rate: Decimal.new("25.0")
-    }, actor: user)
+    },
+    actor: user
+  )
   |> Ash.create()
 
 # Finalize the credit note
@@ -358,7 +394,10 @@ IO.puts("✅ Created and finalized credit note: #{credit_note.serial_number}")
       customer_email: customer3.email,
       customer_phone: customer3.phone,
       currency: "NOK"
-    }, tenant: user.id, actor: user)
+    },
+    tenant: user.id,
+    actor: user
+  )
   |> Ash.create()
 
 # Add single line
@@ -373,7 +412,9 @@ IO.puts("✅ Created and finalized credit note: #{credit_note.serial_number}")
       quantity: Decimal.new("8.0"),
       unit_price: Decimal.new("1500.00"),
       tax_rate: Decimal.new("25.0")
-    }, actor: user)
+    },
+    actor: user
+  )
   |> Ash.create()
 
 IO.puts("✅ Created simple invoice for individual consultant")

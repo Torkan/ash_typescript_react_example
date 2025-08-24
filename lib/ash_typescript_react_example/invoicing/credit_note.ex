@@ -145,6 +145,10 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
       filter expr(original_invoice_id == ^arg(:invoice_id))
     end
 
+    read :get_by_id do
+      get_by [:id]
+    end
+
     update :finalize do
       # Transition credit note to finalized state and assign serial number
       accept []

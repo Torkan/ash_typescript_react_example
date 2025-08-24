@@ -124,6 +124,10 @@ defmodule AshTypescriptReactExample.Invoicing.Invoice do
       filter expr(state == ^arg(:state))
     end
 
+    read :get_by_id do
+      get_by [:id]
+    end
+
     update :finalize do
       # Transition invoice to finalized state and assign serial number
       accept []

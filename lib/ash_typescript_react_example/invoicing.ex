@@ -20,17 +20,17 @@ defmodule AshTypescriptReactExample.Invoicing do
     # Company management
     resource AshTypescriptReactExample.Invoicing.Company do
       rpc_action :create_company, :create
-      rpc_action :get_company, :read
+      rpc_action :get_company, :get_by_id
       rpc_action :update_company, :update
       rpc_action :delete_company, :destroy
       rpc_action :list_companies, :list
       rpc_action :get_default_company, :get_default
     end
 
-    # Customer management  
+    # Customer management
     resource AshTypescriptReactExample.Invoicing.Customer do
       rpc_action :create_customer, :create
-      rpc_action :get_customer, :read
+      rpc_action :get_customer, :get_by_id
       rpc_action :update_customer, :update
       rpc_action :delete_customer, :destroy
       rpc_action :list_active_customers, :list_active
@@ -41,7 +41,7 @@ defmodule AshTypescriptReactExample.Invoicing do
     # Invoice management
     resource AshTypescriptReactExample.Invoicing.Invoice do
       rpc_action :create_invoice, :create
-      rpc_action :get_invoice, :read
+      rpc_action :get_invoice, :get_by_id
       rpc_action :update_invoice, :update
       rpc_action :delete_invoice, :destroy
       rpc_action :list_invoices, :list
@@ -53,7 +53,7 @@ defmodule AshTypescriptReactExample.Invoicing do
     # Invoice line management
     resource AshTypescriptReactExample.Invoicing.InvoiceLine do
       rpc_action :create_invoice_line, :create
-      rpc_action :get_invoice_line, :read
+      rpc_action :get_invoice_line, :get_by_id
       rpc_action :update_invoice_line, :update
       rpc_action :delete_invoice_line, :destroy
       rpc_action :list_invoice_lines, :list_for_invoice
@@ -64,7 +64,7 @@ defmodule AshTypescriptReactExample.Invoicing do
     resource AshTypescriptReactExample.Invoicing.CreditNote do
       rpc_action :create_credit_note, :create
       rpc_action :create_credit_note_from_invoice, :create_from_invoice
-      rpc_action :get_credit_note, :read
+      rpc_action :get_credit_note, :get_by_id
       rpc_action :update_credit_note, :update
       rpc_action :delete_credit_note, :destroy
       rpc_action :list_credit_notes, :list
@@ -77,7 +77,7 @@ defmodule AshTypescriptReactExample.Invoicing do
     # Credit note line management
     resource AshTypescriptReactExample.Invoicing.CreditNoteLine do
       rpc_action :create_credit_note_line, :create
-      rpc_action :get_credit_note_line, :read
+      rpc_action :get_credit_note_line, :get_by_id
       rpc_action :update_credit_note_line, :update
       rpc_action :delete_credit_note_line, :destroy
       rpc_action :list_credit_note_lines, :list_for_credit_note
@@ -86,7 +86,7 @@ defmodule AshTypescriptReactExample.Invoicing do
 
     # Sequence number management (mostly internal, but expose read access)
     resource AshTypescriptReactExample.Invoicing.SequenceNumber do
-      rpc_action :get_sequence_number, :read
+      rpc_action :get_sequence_number, :get_by_id
       rpc_action :get_sequence_for_user_and_type, :get_for_user_and_type
     end
   end

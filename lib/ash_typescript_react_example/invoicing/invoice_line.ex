@@ -54,6 +54,10 @@ defmodule AshTypescriptReactExample.Invoicing.InvoiceLine do
       argument :line_number, :integer, allow_nil?: false
       filter expr(invoice_id == ^arg(:invoice_id) and line_number == ^arg(:line_number))
     end
+
+    read :get_by_id do
+      get_by [:id]
+    end
   end
 
   policies do

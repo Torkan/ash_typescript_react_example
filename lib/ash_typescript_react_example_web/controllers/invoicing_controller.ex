@@ -1,6 +1,6 @@
 defmodule AshTypescriptReactExampleWeb.InvoicingController do
   use AshTypescriptReactExampleWeb, :controller
-  
+
   plug AshTypescriptReactExampleWeb.Plugs.SetAshTenant
 
   def companies(conn, _params) do
@@ -9,6 +9,23 @@ defmodule AshTypescriptReactExampleWeb.InvoicingController do
     |> assign_prop(:locale, conn.assigns[:locale] || "en")
     |> assign_prop(:page_title, "Companies")
     |> render_inertia("invoicing/Companies")
+  end
+
+  def new_company(conn, _params) do
+    conn
+    |> assign_prop(:current_user_id, conn.assigns.current_user.id)
+    |> assign_prop(:locale, conn.assigns[:locale] || "en")
+    |> assign_prop(:page_title, "New Company")
+    |> render_inertia("invoicing/NewCompany")
+  end
+
+  def edit_company(conn, %{"id" => id}) do
+    conn
+    |> assign_prop(:current_user_id, conn.assigns.current_user.id)
+    |> assign_prop(:company_id, id)
+    |> assign_prop(:locale, conn.assigns[:locale] || "en")
+    |> assign_prop(:page_title, "Edit Company")
+    |> render_inertia("invoicing/EditCompany")
   end
 
   def customers(conn, _params) do

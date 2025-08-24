@@ -48,6 +48,10 @@ defmodule AshTypescriptReactExample.Invoicing.SequenceNumber do
       accept []
       change atomic_update(:next_number, expr(next_number + 1))
     end
+
+    read :get_by_id do
+      get_by [:id]
+    end
   end
 
   policies do

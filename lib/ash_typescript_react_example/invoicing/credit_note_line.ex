@@ -55,6 +55,10 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNoteLine do
       argument :line_number, :integer, allow_nil?: false
       filter expr(credit_note_id == ^arg(:credit_note_id) and line_number == ^arg(:line_number))
     end
+
+    read :get_by_id do
+      get_by [:id]
+    end
   end
 
   policies do

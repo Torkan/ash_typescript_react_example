@@ -73,6 +73,10 @@ defmodule AshTypescriptReactExample.Invoicing.Customer do
       filter expr(is_active == true)
     end
 
+    read :get_by_id do
+      get_by [:id]
+    end
+
     update :deactivate do
       # Soft delete by marking as inactive
       accept []
