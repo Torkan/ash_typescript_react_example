@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { 
-  listActiveCustomers, 
-  createCustomer, 
-  updateCustomer, 
+import {
+  listActiveCustomers,
+  createCustomer,
+  updateCustomer,
   deactivateCustomer,
   activateCustomer,
   buildCSRFHeaders,
-  type CustomerResourceSchema 
+  type CustomerResourceSchema,
 } from "../../ash_rpc";
 
 interface CustomersPageProps {
@@ -20,7 +20,8 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [editingCustomer, setEditingCustomer] = useState<CustomerResourceSchema | null>(null);
+  const [editingCustomer, setEditingCustomer] =
+    useState<CustomerResourceSchema | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     addressLine1: "",
@@ -30,7 +31,7 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
     country: "Norway",
     vatNumber: "",
     email: "",
-    phone: ""
+    phone: "",
   });
 
   useEffect(() => {
@@ -40,12 +41,27 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
   const loadCustomers = async () => {
     try {
       setLoading(true);
-      const data = await listActiveCustomers({
-        fields: ['id', 'name', 'addressLine1', 'addressLine2', 'city', 'postalCode', 
-                 'country', 'vatNumber', 'email', 'phone', 'isActive'],
+      const result = await listActiveCustomers({
+        fields: [
+          "id",
+          "name",
+          "addressLine1",
+          "addressLine2",
+          "city",
+          "postalCode",
+          "country",
+          "vatNumber",
+          "email",
+          "phone",
+          "isActive",
+        ],
         headers: buildCSRFHeaders(),
       });
-      setCustomers(data);
+      if (result.success) {
+        setCustomers(result.data);
+      } else {
+        throw new Error(result.errors.map((e) => e.message).join(", "));
+      }
       setError(null);
     } catch (err) {
       setError("Failed to load customers");
@@ -59,18 +75,24 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
     e.preventDefault();
     try {
       if (editingCustomer) {
-        await updateCustomer({
-          id: editingCustomer.id,
-          params: formData,
-          fields: ['id'],
+        const result = await updateCustomer({
+          primaryKey: editingCustomer.id,
+          input: formData,
+          fields: ["id"],
           headers: buildCSRFHeaders(),
         });
+        if (!result.success) {
+          throw new Error(result.errors.map((e) => e.message).join(", "));
+        }
       } else {
-        await createCustomer({
-          params: formData,
-          fields: ['id'],
+        const result = await createCustomer({
+          input: formData,
+          fields: ["id"],
           headers: buildCSRFHeaders(),
         });
+        if (!result.success) {
+          throw new Error(result.errors.map((e) => e.message).join(", "));
+        }
       }
       await loadCustomers();
       resetForm();
@@ -91,30 +113,42 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
       country: customer.country,
       vatNumber: customer.vatNumber || "",
       email: customer.email || "",
-      phone: customer.phone || ""
+      phone: customer.phone || "",
     });
     setShowForm(true);
   };
 
   const handleDeactivate = async (customer: CustomerResourceSchema) => {
-    if (confirm(`Are you sure you want to ${customer.isActive ? 'deactivate' : 'activate'} this customer?`)) {
+    if (
+      confirm(
+        `Are you sure you want to ${customer.isActive ? "deactivate" : "activate"} this customer?`,
+      )
+    ) {
       try {
         if (customer.isActive) {
-          await deactivateCustomer({
-            id: customer.id,
-            fields: ['id'],
+          const result = await deactivateCustomer({
+            primaryKey: customer.id,
+            fields: ["id"],
             headers: buildCSRFHeaders(),
           });
+          if (!result.success) {
+            throw new Error(result.errors.map((e) => e.message).join(", "));
+          }
         } else {
-          await activateCustomer({
-            id: customer.id,
-            fields: ['id'],
+          const result = await activateCustomer({
+            primaryKey: customer.id,
+            fields: ["id"],
             headers: buildCSRFHeaders(),
           });
+          if (!result.success) {
+            throw new Error(result.errors.map((e) => e.message).join(", "));
+          }
         }
         await loadCustomers();
       } catch (err) {
-        setError(`Failed to ${customer.isActive ? 'deactivate' : 'activate'} customer`);
+        setError(
+          `Failed to ${customer.isActive ? "deactivate" : "activate"} customer`,
+        );
         console.error(err);
       }
     }
@@ -132,7 +166,7 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
       country: "Norway",
       vatNumber: "",
       email: "",
-      phone: ""
+      phone: "",
     });
   };
 
@@ -167,7 +201,10 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
           <h2 className="text-xl font-semibold mb-4">
             {editingCustomer ? "Edit Customer" : "New Customer"}
           </h2>
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Customer Name *
@@ -176,7 +213,9 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
                 type="text"
                 required
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -188,7 +227,9 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
               <input
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -201,7 +242,9 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
                 type="text"
                 required
                 value={formData.addressLine1}
-                onChange={(e) => setFormData({ ...formData, addressLine1: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, addressLine1: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -213,7 +256,9 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
               <input
                 type="text"
                 value={formData.addressLine2}
-                onChange={(e) => setFormData({ ...formData, addressLine2: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, addressLine2: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -226,7 +271,9 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
                 type="text"
                 required
                 value={formData.city}
-                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, city: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -239,7 +286,9 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
                 type="text"
                 required
                 value={formData.postalCode}
-                onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, postalCode: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -252,7 +301,9 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
                 type="text"
                 required
                 value={formData.country}
-                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, country: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -264,7 +315,9 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
               <input
                 type="text"
                 value={formData.vatNumber}
-                onChange={(e) => setFormData({ ...formData, vatNumber: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, vatNumber: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -276,7 +329,9 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
               <input
                 type="tel"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -305,18 +360,22 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
           <div key={customer.id} className="bg-white shadow rounded-lg p-4">
             <div className="flex justify-between items-start mb-2">
               <h3 className="text-lg font-semibold">{customer.name}</h3>
-              <span className={`text-xs px-2 py-1 rounded ${
-                customer.isActive 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-gray-100 text-gray-800'
-              }`}>
-                {customer.isActive ? 'Active' : 'Inactive'}
+              <span
+                className={`text-xs px-2 py-1 rounded ${
+                  customer.isActive
+                    ? "bg-green-100 text-green-800"
+                    : "bg-gray-100 text-gray-800"
+                }`}
+              >
+                {customer.isActive ? "Active" : "Inactive"}
               </span>
             </div>
             <div className="text-sm text-gray-600 space-y-1">
               <p>{customer.addressLine1}</p>
               {customer.addressLine2 && <p>{customer.addressLine2}</p>}
-              <p>{customer.city} {customer.postalCode}</p>
+              <p>
+                {customer.city} {customer.postalCode}
+              </p>
               <p>{customer.country}</p>
               {customer.vatNumber && <p>VAT: {customer.vatNumber}</p>}
               {customer.email && <p>Email: {customer.email}</p>}
@@ -332,12 +391,12 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
               <button
                 onClick={() => handleDeactivate(customer)}
                 className={`text-sm font-medium ${
-                  customer.isActive 
-                    ? 'text-orange-600 hover:text-orange-800' 
-                    : 'text-green-600 hover:text-green-800'
+                  customer.isActive
+                    ? "text-orange-600 hover:text-orange-800"
+                    : "text-green-600 hover:text-green-800"
                 }`}
               >
-                {customer.isActive ? 'Deactivate' : 'Activate'}
+                {customer.isActive ? "Deactivate" : "Activate"}
               </button>
             </div>
           </div>
@@ -346,7 +405,8 @@ export default function Customers({ current_user_id }: CustomersPageProps) {
 
       {customers.length === 0 && !showForm && (
         <div className="text-center py-8 text-gray-500">
-          No active customers found. Click "Add Customer" to create your first customer.
+          No active customers found. Click "Add Customer" to create your first
+          customer.
         </div>
       )}
     </div>

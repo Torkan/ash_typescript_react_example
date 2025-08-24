@@ -49,7 +49,7 @@ export default function NewInvoice({ current_user_id }: NewInvoicePageProps) {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [companiesData, customersData] = await Promise.all([
+      const [companiesResult, customersResult] = await Promise.all([
         listCompanies({
           fields: ['id', 'name', 'addressLine1', 'addressLine2', 'city', 
                    'postalCode', 'country', 'vatNumber', 'email', 'phone', 'isDefault'],
@@ -62,11 +62,18 @@ export default function NewInvoice({ current_user_id }: NewInvoicePageProps) {
         })
       ]);
       
-      setCompanies(companiesData);
-      setCustomers(customersData);
+      if (!companiesResult.success) {
+        throw new Error(companiesResult.errors.map(e => e.message).join(', '));
+      }
+      if (!customersResult.success) {
+        throw new Error(customersResult.errors.map(e => e.message).join(', '));
+      }
+      
+      setCompanies(companiesResult.data);
+      setCustomers(customersResult.data);
       
       // Auto-select default company if exists
-      const defaultCompany = companiesData.find(c => c.isDefault);
+      const defaultCompany = companiesResult.data.find(c => c.isDefault);
       if (defaultCompany) {
         setSelectedCompany(defaultCompany);
       }
@@ -92,8 +99,8 @@ export default function NewInvoice({ current_user_id }: NewInvoicePageProps) {
       setSaving(true);
       
       // Create the invoice
-      const invoice = await createInvoice({
-        params: {
+      const invoiceResult = await createInvoice({
+        input: {
           issueDate: formData.issueDate,
           dueDate: formData.dueDate,
           currency: formData.currency,
@@ -120,13 +127,17 @@ export default function NewInvoice({ current_user_id }: NewInvoicePageProps) {
         headers: buildCSRFHeaders(),
       });
       
+      if (!invoiceResult.success) {
+        throw new Error(invoiceResult.errors.map(e => e.message).join(', '));
+      }
+      
       // Create invoice lines
       const validLines = lines.filter(line => line.description && line.unitPrice);
       for (let i = 0; i < validLines.length; i++) {
         const line = validLines[i];
-        await createInvoiceLine({
-          params: {
-            invoiceId: invoice.id,
+        const lineResult = await createInvoiceLine({
+          input: {
+            invoiceId: invoiceResult.data.id,
             lineNumber: i + 1,
             description: line.description,
             quantity: line.quantity,
@@ -136,6 +147,10 @@ export default function NewInvoice({ current_user_id }: NewInvoicePageProps) {
           fields: ['id'],
           headers: buildCSRFHeaders(),
         });
+        
+        if (!lineResult.success) {
+          throw new Error(lineResult.errors.map(e => e.message).join(', '));
+        }
       }
       
       // Redirect to invoices list

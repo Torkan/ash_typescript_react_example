@@ -29,7 +29,7 @@ export default function Invoices({ current_user_id }: InvoicesPageProps) {
   const loadInvoices = async () => {
     try {
       setLoading(true);
-      const data = await listInvoices({
+      const result = await listInvoices({
         fields: [
           "id",
           "serialNumber",
@@ -42,7 +42,11 @@ export default function Invoices({ current_user_id }: InvoicesPageProps) {
         ],
         headers: buildCSRFHeaders(),
       });
-      setInvoices(data);
+      if (result.success) {
+        setInvoices(result.data);
+      } else {
+        throw new Error(result.errors.map(e => e.message).join(', '));
+      }
       setError(null);
     } catch (err) {
       setError("Failed to load invoices");

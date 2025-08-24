@@ -41,7 +41,7 @@ export default function Companies({ current_user_id }: CompaniesPageProps) {
   const loadCompanies = async () => {
     try {
       setLoading(true);
-      const data = await listCompanies({
+      const result = await listCompanies({
         fields: [
           "id",
           "name",
@@ -57,7 +57,11 @@ export default function Companies({ current_user_id }: CompaniesPageProps) {
         ],
         headers: buildCSRFHeaders(),
       });
-      setCompanies(data);
+      if (result.success) {
+        setCompanies(result.data);
+      } else {
+        throw new Error(result.errors.map((e) => e.message).join(", "));
+      }
       setError(null);
     } catch (err) {
       setError("Failed to load companies");
@@ -71,18 +75,24 @@ export default function Companies({ current_user_id }: CompaniesPageProps) {
     e.preventDefault();
     try {
       if (editingCompany) {
-        await updateCompany({
+        const result = await updateCompany({
           primaryKey: editingCompany.id,
           input: formData,
           fields: ["id"],
           headers: buildCSRFHeaders(),
         });
+        if (!result.success) {
+          throw new Error(result.errors.map((e) => e.message).join(", "));
+        }
       } else {
-        await createCompany({
+        const result = await createCompany({
           input: formData,
           fields: ["id"],
           headers: buildCSRFHeaders(),
         });
+        if (!result.success) {
+          throw new Error(result.errors.map((e) => e.message).join(", "));
+        }
       }
       await loadCompanies();
       resetForm();
@@ -112,7 +122,13 @@ export default function Companies({ current_user_id }: CompaniesPageProps) {
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this company?")) {
       try {
-        await deleteCompany({ id, headers: buildCSRFHeaders() });
+        const result = await deleteCompany({
+          primaryKey: id,
+          headers: buildCSRFHeaders(),
+        });
+        if (!result.success) {
+          throw new Error(result.errors.map((e) => e.message).join(", "));
+        }
         await loadCompanies();
       } catch (err) {
         setError("Failed to delete company");

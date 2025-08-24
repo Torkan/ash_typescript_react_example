@@ -27,12 +27,16 @@ export default function CreditNotes({ current_user_id }: CreditNotesPageProps) {
   const loadCreditNotes = async () => {
     try {
       setLoading(true);
-      const data = await listCreditNotes({
+      const result = await listCreditNotes({
         fields: ['id', 'serialNumber', 'state', 'issueDate', 'creditReason',
                  'customerName', 'companyName', 'currency', 'originalInvoiceId'],
         headers: buildCSRFHeaders(),
       });
-      setCreditNotes(data);
+      if (result.success) {
+        setCreditNotes(result.data);
+      } else {
+        throw new Error(result.errors.map(e => e.message).join(', '));
+      }
       setError(null);
     } catch (err) {
       setError("Failed to load credit notes");
@@ -45,11 +49,14 @@ export default function CreditNotes({ current_user_id }: CreditNotesPageProps) {
   const handleFinalize = async (id: string) => {
     if (confirm("Are you sure you want to finalize this credit note? This action cannot be undone.")) {
       try {
-        await finalizeCreditNote({
-          id,
+        const result = await finalizeCreditNote({
+          primaryKey: id,
           fields: ['id'],
           headers: buildCSRFHeaders(),
         });
+        if (!result.success) {
+          throw new Error(result.errors.map(e => e.message).join(', '));
+        }
         await loadCreditNotes();
       } catch (err) {
         setError("Failed to finalize credit note");
@@ -61,11 +68,14 @@ export default function CreditNotes({ current_user_id }: CreditNotesPageProps) {
   const handleCancel = async (id: string) => {
     if (confirm("Are you sure you want to cancel this credit note?")) {
       try {
-        await cancelCreditNote({
-          id,
+        const result = await cancelCreditNote({
+          primaryKey: id,
           fields: ['id'],
           headers: buildCSRFHeaders(),
         });
+        if (!result.success) {
+          throw new Error(result.errors.map(e => e.message).join(', '));
+        }
         await loadCreditNotes();
       } catch (err) {
         setError("Failed to cancel credit note");
@@ -77,10 +87,13 @@ export default function CreditNotes({ current_user_id }: CreditNotesPageProps) {
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this draft credit note?")) {
       try {
-        await deleteCreditNote({
-          id,
+        const result = await deleteCreditNote({
+          primaryKey: id,
           headers: buildCSRFHeaders(),
         });
+        if (!result.success) {
+          throw new Error(result.errors.map(e => e.message).join(', '));
+        }
         await loadCreditNotes();
       } catch (err) {
         setError("Failed to delete credit note");

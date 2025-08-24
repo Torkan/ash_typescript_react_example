@@ -53,7 +53,7 @@ export default function NewCreditNote({ current_user_id }: NewCreditNotePageProp
   const loadData = async () => {
     try {
       setLoading(true);
-      const [companiesData, customersData, invoicesData] = await Promise.all([
+      const [companiesResult, customersResult, invoicesResult] = await Promise.all([
         listCompanies({
           fields: ['id', 'name', 'addressLine1', 'addressLine2', 'city', 
                    'postalCode', 'country', 'vatNumber', 'email', 'phone', 'isDefault'],
@@ -65,18 +65,28 @@ export default function NewCreditNote({ current_user_id }: NewCreditNotePageProp
           headers: buildCSRFHeaders(),
         }),
         listInvoicesByState({
-          state: 'finalized',
+          input: { state: 'finalized' },
           fields: ['id', 'serialNumber', 'customerName', 'companyName', 'currency', 'issueDate'],
           headers: buildCSRFHeaders(),
         })
       ]);
       
-      setCompanies(companiesData);
-      setCustomers(customersData);
-      setInvoices(invoicesData);
+      if (!companiesResult.success) {
+        throw new Error(companiesResult.errors.map(e => e.message).join(', '));
+      }
+      if (!customersResult.success) {
+        throw new Error(customersResult.errors.map(e => e.message).join(', '));
+      }
+      if (!invoicesResult.success) {
+        throw new Error(invoicesResult.errors.map(e => e.message).join(', '));
+      }
+      
+      setCompanies(companiesResult.data);
+      setCustomers(customersResult.data);
+      setInvoices(invoicesResult.data);
       
       // Auto-select default company if exists
-      const defaultCompany = companiesData.find(c => c.isDefault);
+      const defaultCompany = companiesResult.data.find(c => c.isDefault);
       if (defaultCompany) {
         setSelectedCompany(defaultCompany);
       }
@@ -122,8 +132,8 @@ export default function NewCreditNote({ current_user_id }: NewCreditNotePageProp
       setSaving(true);
       
       // Create the credit note
-      const creditNote = await createCreditNote({
-        params: {
+      const creditNoteResult = await createCreditNote({
+        input: {
           issueDate: formData.issueDate,
           creditReason: formData.creditReason,
           currency: formData.currency,
@@ -151,13 +161,17 @@ export default function NewCreditNote({ current_user_id }: NewCreditNotePageProp
         headers: buildCSRFHeaders(),
       });
       
+      if (!creditNoteResult.success) {
+        throw new Error(creditNoteResult.errors.map(e => e.message).join(', '));
+      }
+      
       // Create credit note lines
       const validLines = lines.filter(line => line.description && line.unitPrice);
       for (let i = 0; i < validLines.length; i++) {
         const line = validLines[i];
-        await createCreditNoteLine({
-          params: {
-            creditNoteId: creditNote.id,
+        const lineResult = await createCreditNoteLine({
+          input: {
+            creditNoteId: creditNoteResult.data.id,
             lineNumber: i + 1,
             description: line.description,
             quantity: line.quantity,
@@ -167,6 +181,10 @@ export default function NewCreditNote({ current_user_id }: NewCreditNotePageProp
           fields: ['id'],
           headers: buildCSRFHeaders(),
         });
+        
+        if (!lineResult.success) {
+          throw new Error(lineResult.errors.map(e => e.message).join(', '));
+        }
       }
       
       // Redirect to credit notes list
