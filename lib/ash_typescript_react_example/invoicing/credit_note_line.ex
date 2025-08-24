@@ -1,7 +1,7 @@
 defmodule AshTypescriptReactExample.Invoicing.CreditNoteLine do
   @moduledoc """
   CreditNoteLine resource representing individual line items for credit notes.
-  
+
   Similar structure to InvoiceLine but for credit note documents.
   Each line item has quantity, unit price, and tax rate.
   Financial totals are calculated using Ash calculations for consistency.
@@ -14,11 +14,6 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNoteLine do
     extensions: [AshTypescript.Resource],
     authorizers: [Ash.Policy.Authorizer]
 
-  # Clean TypeScript type name
-  typescript do
-    type_name "CreditNoteLine"
-  end
-
   postgres do
     table "credit_note_lines"
     repo AshTypescriptReactExample.Repo
@@ -29,33 +24,9 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNoteLine do
     end
   end
 
-  attributes do
-    uuid_primary_key :id
-
-    attribute :credit_note_id, :uuid, allow_nil?: false, public?: true
-    attribute :line_number, :integer, allow_nil?: false, public?: true # For ordering
-    attribute :description, :string, allow_nil?: false, public?: true
-    attribute :quantity, :decimal, default: Decimal.new("1"), allow_nil?: false, public?: true
-    attribute :unit_price, :decimal, allow_nil?: false, public?: true
-    attribute :tax_rate, :decimal, default: Decimal.new("0"), allow_nil?: false, public?: true # Tax percentage (e.g., 25.0 for 25%)
-
-    # Timestamps
-    create_timestamp :inserted_at
-    update_timestamp :updated_at
-  end
-
-  # Financial calculations using Ash expressions
-  calculations do
-    calculate :line_total, :decimal, expr(quantity * unit_price)
-    calculate :tax_amount, :decimal, expr((quantity * unit_price) * (tax_rate / 100))
-    calculate :line_total_with_tax, :decimal, expr((quantity * unit_price) + ((quantity * unit_price) * (tax_rate / 100)))
-  end
-
-  relationships do
-    belongs_to :credit_note, AshTypescriptReactExample.Invoicing.CreditNote do
-      allow_nil? false
-      attribute_writable? false
-    end
+  # Clean TypeScript type name
+  typescript do
+    type_name "CreditNoteLine"
   end
 
   actions do
@@ -105,28 +76,65 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNoteLine do
 
   validations do
     # Quantity must be positive
-    validate compare(:quantity, greater_than: 0), 
+    validate compare(:quantity, greater_than: 0),
       message: "must be greater than 0"
 
     # Unit price must be non-negative (can be 0 for free items)
-    validate compare(:unit_price, greater_than_or_equal_to: 0), 
+    validate compare(:unit_price, greater_than_or_equal_to: 0),
       message: "must be 0 or greater"
 
     # Tax rate must be non-negative (typically 0-100%)
-    validate compare(:tax_rate, greater_than_or_equal_to: 0), 
+    validate compare(:tax_rate, greater_than_or_equal_to: 0),
       message: "must be 0 or greater"
 
     # Tax rate should be reasonable (0-100%)
-    validate compare(:tax_rate, less_than_or_equal_to: 100), 
+    validate compare(:tax_rate, less_than_or_equal_to: 100),
       message: "should not exceed 100%"
 
     # Line number must be positive
-    validate compare(:line_number, greater_than: 0), 
+    validate compare(:line_number, greater_than: 0),
       message: "must be greater than 0"
 
     # Description cannot be empty
-    validate string_length(:description, min: 1), 
+    validate string_length(:description, min: 1),
       message: "cannot be empty"
+  end
+
+  attributes do
+    uuid_primary_key :id
+
+    attribute :credit_note_id, :uuid, allow_nil?: false, public?: true
+
+    # For ordering
+    attribute :line_number, :integer, allow_nil?: false, public?: true
+    attribute :description, :string, allow_nil?: false, public?: true
+    attribute :quantity, :decimal, default: Decimal.new("1"), allow_nil?: false, public?: true
+    attribute :unit_price, :decimal, allow_nil?: false, public?: true
+
+    # Tax percentage (e.g., 25.0 for 25%)
+
+    attribute :tax_rate, :decimal, default: Decimal.new("0"), allow_nil?: false, public?: true
+
+    # Timestamps
+    create_timestamp :inserted_at
+    update_timestamp :updated_at
+  end
+
+  relationships do
+    belongs_to :credit_note, AshTypescriptReactExample.Invoicing.CreditNote do
+      allow_nil? false
+      attribute_writable? false
+    end
+  end
+
+  # Financial calculations using Ash expressions
+  calculations do
+    calculate :line_total, :decimal, expr(quantity * unit_price)
+    calculate :tax_amount, :decimal, expr(quantity * unit_price * (tax_rate / 100))
+
+    calculate :line_total_with_tax,
+              :decimal,
+              expr(quantity * unit_price + quantity * unit_price * (tax_rate / 100))
   end
 
   identities do

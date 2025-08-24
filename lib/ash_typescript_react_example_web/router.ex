@@ -26,8 +26,8 @@ defmodule AshTypescriptReactExampleWeb.Router do
   pipeline :user do
     plug :browser
     plug AshTypescriptReactExampleWeb.Plugs.RequireUser
+    plug AshTypescriptReactExampleWeb.Plugs.SetAshTenant
   end
-
 
   scope "/", AshTypescriptReactExampleWeb do
     pipe_through :browser
@@ -52,6 +52,16 @@ defmodule AshTypescriptReactExampleWeb.Router do
     get "/", PageController, :index
     post "/rpc/run", RpcController, :run
     post "/rpc/validate", RpcController, :validate
+
+    # Invoicing routes
+    get "/companies", InvoicingController, :companies
+    get "/customers", InvoicingController, :customers
+    get "/invoices", InvoicingController, :invoices
+    get "/invoices/new", InvoicingController, :new_invoice
+    get "/invoices/:id/edit", InvoicingController, :edit_invoice
+    get "/credit-notes", InvoicingController, :credit_notes
+    get "/credit-notes/new", InvoicingController, :new_credit_note
+    get "/credit-notes/:id/edit", InvoicingController, :edit_credit_note
   end
 
   scope "/", AshTypescriptReactExampleWeb do

@@ -83,6 +83,8 @@ config :logger, :default_formatter,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :ash_typescript, generate_zod_schemas: true
+
 config :inertia,
   # The Phoenix Endpoint module for your application. This is used for building
   # asset URLs to compute a unique version hash to track when something has
@@ -110,7 +112,7 @@ config :inertia,
 
   # Enable server-side rendering for page responses (requires some additional setup,
   # see instructions below). Defaults to `false`.
-  ssr: false,
+  ssr: true,
 
   # Whether to raise an exception when server-side rendering fails (only applies
   # when SSR is enabled). Defaults to `true`.

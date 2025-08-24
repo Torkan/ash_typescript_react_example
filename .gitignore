@@ -35,3 +35,5 @@ ash_typescript_react_example-*.tar
 npm-debug.log
 /assets/node_modules/
 .claude/
+/priv/ssr/*
+/assets/js/ash_rpc.ts

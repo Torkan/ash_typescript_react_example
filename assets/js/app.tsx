@@ -19,7 +19,7 @@
 
 // Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
 import { createInertiaApp } from "@inertiajs/react";
-import { createRoot } from "react-dom/client";
+import { hydrateRoot } from "react-dom/client";
 import axios from "axios";
 import React from "react";
 
@@ -31,6 +31,6 @@ createInertiaApp({
     return pages[`./pages/${name}.tsx`];
   },
   setup({ el, App, props }) {
-    createRoot(el).render(<App {...props} />);
+    hydrateRoot(el, <App {...props} />);
   },
 });

@@ -30,6 +30,10 @@ defmodule AshTypescriptReactExampleWeb.Endpoint do
     plug Tidewave
   end
 
+  if Code.ensure_loaded?(Tidewave) do
+    plug Tidewave, allowed_origins: ["//localhost:5173", "//localhost:4000"]
+  end
+
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
   if code_reloading? do

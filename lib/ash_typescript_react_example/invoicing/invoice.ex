@@ -36,7 +36,7 @@ defmodule AshTypescriptReactExample.Invoicing.Invoice do
 
   # Clean TypeScript type name
   typescript do
-    type_name("Invoice")
+    type_name "Invoice"
   end
 
   # State machine implementation
@@ -281,31 +281,22 @@ defmodule AshTypescriptReactExample.Invoicing.Invoice do
     has_many :invoice_lines, AshTypescriptReactExample.Invoicing.InvoiceLine
   end
 
-  # Financial totals using Ash calculations with Ecto queries
+  # Financial totals using Ash calculations
   calculations do
-    # Subtotal: sum of all line totals (quantity * unit_price) from invoice lines
-    calculate :subtotal_amount, :decimal do
-      calculation fn query, _context ->
-        import Ecto.Query
-
-        from line in AshTypescriptReactExample.Invoicing.InvoiceLine,
-          where: line.invoice_id == parent_as(:invoice).id,
-          select: coalesce(sum(line.quantity * line.unit_price), 0)
-      end
-    end
-
-    # Tax amount: sum of all tax amounts from invoice lines
-    calculate :tax_amount, :decimal do
-      calculation fn query, _context ->
-        import Ecto.Query
-
-        from line in AshTypescriptReactExample.Invoicing.InvoiceLine,
-          where: line.invoice_id == parent_as(:invoice).id,
-          select: coalesce(sum(line.quantity * line.unit_price * line.tax_rate / 100), 0)
-      end
-    end
-
     # Total amount: subtotal + tax
     calculate :total_amount, :decimal, expr(subtotal_amount + tax_amount)
+  end
+
+  # Aggregates for financial calculations
+  aggregates do
+    # Calculate sum of line_total from invoice_lines 
+    sum :subtotal_amount, :invoice_lines, :line_total do
+      default Decimal.new(0)
+    end
+
+    # Calculate sum of tax_amount from invoice_lines
+    sum :tax_amount, :invoice_lines, :tax_amount do
+      default Decimal.new(0)
+    end
   end
 end

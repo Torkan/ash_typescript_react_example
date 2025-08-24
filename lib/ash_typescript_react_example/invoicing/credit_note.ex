@@ -314,31 +314,22 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
     has_many :credit_note_lines, AshTypescriptReactExample.Invoicing.CreditNoteLine
   end
 
-  # Financial totals using Ash calculations with Ecto queries
+  # Financial totals using Ash calculations
   calculations do
-    # Subtotal: sum of all line totals (quantity * unit_price) from credit note lines
-    calculate :subtotal_amount, :decimal do
-      calculation fn query, _context ->
-        import Ecto.Query
-
-        from line in AshTypescriptReactExample.Invoicing.CreditNoteLine,
-          where: line.credit_note_id == parent_as(:credit_note).id,
-          select: coalesce(sum(line.quantity * line.unit_price), 0)
-      end
-    end
-
-    # Tax amount: sum of all tax amounts from credit note lines
-    calculate :tax_amount, :decimal do
-      calculation fn query, _context ->
-        import Ecto.Query
-
-        from line in AshTypescriptReactExample.Invoicing.CreditNoteLine,
-          where: line.credit_note_id == parent_as(:credit_note).id,
-          select: coalesce(sum(line.quantity * line.unit_price * line.tax_rate / 100), 0)
-      end
-    end
-
     # Total amount: subtotal + tax
     calculate :total_amount, :decimal, expr(subtotal_amount + tax_amount)
+  end
+
+  # Aggregates for financial calculations  
+  aggregates do
+    # Calculate sum of line_total from credit_note_lines
+    sum :subtotal_amount, :credit_note_lines, :line_total do
+      default Decimal.new(0)
+    end
+
+    # Calculate sum of tax_amount from credit_note_lines
+    sum :tax_amount, :credit_note_lines, :tax_amount do
+      default Decimal.new(0)
+    end
   end
 end

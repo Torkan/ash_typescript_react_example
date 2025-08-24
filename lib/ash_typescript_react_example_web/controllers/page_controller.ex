@@ -13,7 +13,7 @@ defmodule AshTypescriptReactExampleWeb.PageController do
         conn
         |> assign_prop(:current_user_id, current_user.id)
         |> assign_prop(:locale, conn.assigns[:locale] || "en")
-        |> assign_prop(:page_title, "Select Venue")
+        |> assign_prop(:page_title, "Invoice Management System")
         |> render_inertia("Index")
     end
   end

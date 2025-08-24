@@ -13,11 +13,10 @@ defmodule AshTypescriptReactExample.Application do
       {DNSCluster,
        query: Application.get_env(:ash_typescript_react_example, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: AshTypescriptReactExample.PubSub},
-      # Start a worker by calling: AshTypescriptReactExample.Worker.start_link(arg)
-      # {AshTypescriptReactExample.Worker, arg},
-      # Start to serve requests, typically the last entry
-      AshTypescriptReactExampleWeb.Endpoint,
-      {AshAuthentication.Supervisor, [otp_app: :ash_typescript_react_example]}
+      {AshAuthentication.Supervisor, [otp_app: :ash_typescript_react_example]},
+      {Inertia.SSR,
+       path: Path.join([Application.app_dir(:ash_typescript_react_example), "priv/ssr"])},
+      AshTypescriptReactExampleWeb.Endpoint
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

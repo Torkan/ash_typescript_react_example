@@ -1,7 +1,7 @@
 defmodule AshTypescriptReactExample.Invoicing.Company do
   @moduledoc """
   Company resource for storing sender company details.
-  
+
   Companies represent the sender information that appears on invoices and credit notes.
   Each user can have multiple companies, with one marked as default.
   Company details are captured at invoice creation time for immutability.
@@ -14,11 +14,6 @@ defmodule AshTypescriptReactExample.Invoicing.Company do
     extensions: [AshTypescript.Resource],
     authorizers: [Ash.Policy.Authorizer]
 
-  # Clean TypeScript type name
-  typescript do
-    type_name "Company"
-  end
-
   postgres do
     table "companies"
     repo AshTypescriptReactExample.Repo
@@ -27,6 +22,82 @@ defmodule AshTypescriptReactExample.Invoicing.Company do
       index [:user_id]
       index [:user_id, :is_default]
     end
+  end
+
+  # Clean TypeScript type name
+  typescript do
+    type_name "Company"
+  end
+
+  actions do
+    defaults [:read, :destroy]
+
+    create :create do
+      primary? true
+
+      accept [
+        :name,
+        :address_line_1,
+        :address_line_2,
+        :city,
+        :postal_code,
+        :country,
+        :vat_number,
+        :email,
+        :phone,
+        :is_default
+      ]
+
+      change relate_actor(:user)
+      change set_attribute(:user_id, actor(:id))
+    end
+
+    update :update do
+      primary? true
+
+      accept [
+        :name,
+        :address_line_1,
+        :address_line_2,
+        :city,
+        :postal_code,
+        :country,
+        :vat_number,
+        :email,
+        :phone,
+        :is_default
+      ]
+    end
+
+    read :list do
+      # Will be used for listing companies for a user
+    end
+
+    read :get_default do
+      # Get the default company for a user
+      filter expr(is_default == true)
+    end
+  end
+
+  policies do
+    # Only allow users to access their own companies
+    bypass AshAuthentication.Checks.AshAuthenticationInteraction do
+      authorize_if always()
+    end
+
+    policy action_type(:read) do
+      authorize_if actor_present()
+    end
+
+    policy action_type([:create, :update, :destroy]) do
+      authorize_if actor_present()
+    end
+  end
+
+  validations do
+    validate match(:email, ~r/.+@.+\..+/),
+      message: "must be a valid email address",
+      on: [:create, :update]
   end
 
   # Multi-tenant by user_id
@@ -63,50 +134,5 @@ defmodule AshTypescriptReactExample.Invoicing.Company do
       allow_nil? false
       attribute_writable? false
     end
-  end
-
-  actions do
-    defaults [:read, :destroy]
-
-    create :create do
-      primary? true
-      accept [:name, :address_line_1, :address_line_2, :city, :postal_code, :country, :vat_number, :email, :phone, :is_default]
-
-      change relate_actor(:user)
-      change set_attribute(:user_id, actor(:id))
-    end
-
-    update :update do
-      primary? true
-      accept [:name, :address_line_1, :address_line_2, :city, :postal_code, :country, :vat_number, :email, :phone, :is_default]
-    end
-
-    read :list do
-      # Will be used for listing companies for a user
-    end
-
-    read :get_default do
-      # Get the default company for a user
-      filter expr(is_default == true)
-    end
-  end
-
-  policies do
-    # Only allow users to access their own companies
-    bypass AshAuthentication.Checks.AshAuthenticationInteraction do
-      authorize_if always()
-    end
-
-    policy action_type(:read) do
-      authorize_if actor_present()
-    end
-
-    policy action_type([:create, :update, :destroy]) do
-      authorize_if actor_present()
-    end
-  end
-
-  validations do
-    validate match(:email, ~r/.+@.+\..+/), message: "must be a valid email address", on: [:create, :update]
   end
 end

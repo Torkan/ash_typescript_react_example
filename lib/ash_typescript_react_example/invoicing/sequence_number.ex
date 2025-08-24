@@ -1,7 +1,7 @@
 defmodule AshTypescriptReactExample.Invoicing.SequenceNumber do
   @moduledoc """
   SequenceNumber resource for managing serial number sequences per user.
-  
+
   This resource ensures atomic increment of sequence numbers and prevents race conditions.
   Each user has separate sequences for different document types (invoice, credit_note).
   """
@@ -11,11 +11,6 @@ defmodule AshTypescriptReactExample.Invoicing.SequenceNumber do
     data_layer: AshPostgres.DataLayer,
     extensions: [AshTypescript.Resource],
     authorizers: [Ash.Policy.Authorizer]
-
-  # Clean TypeScript type name
-  typescript do
-    type_name "SequenceNumber"
-  end
 
   postgres do
     table "sequence_numbers"
@@ -27,26 +22,9 @@ defmodule AshTypescriptReactExample.Invoicing.SequenceNumber do
     end
   end
 
-  attributes do
-    uuid_primary_key :id
-
-    attribute :user_id, :uuid, allow_nil?: false, public?: true
-    attribute :document_type, :atom, 
-      constraints: [one_of: [:invoice, :credit_note]], 
-      allow_nil?: false, 
-      public?: true
-    attribute :next_number, :integer, default: 1, allow_nil?: false, public?: true
-
-    # Timestamps
-    create_timestamp :inserted_at
-    update_timestamp :updated_at
-  end
-
-  relationships do
-    belongs_to :user, AshTypescriptReactExample.Accounts.User do
-      allow_nil? false
-      attribute_writable? false
-    end
+  # Clean TypeScript type name
+  typescript do
+    type_name "SequenceNumber"
   end
 
   actions do
@@ -61,7 +39,7 @@ defmodule AshTypescriptReactExample.Invoicing.SequenceNumber do
       # Get sequence for specific user and document type
       argument :user_id, :uuid, allow_nil?: false
       argument :document_type, :atom, allow_nil?: false
-      
+
       filter expr(user_id == ^arg(:user_id) and document_type == ^arg(:document_type))
     end
 
@@ -81,6 +59,30 @@ defmodule AshTypescriptReactExample.Invoicing.SequenceNumber do
     policy action_type([:read, :create, :update]) do
       # This will be used internally by the system
       authorize_if always()
+    end
+  end
+
+  attributes do
+    uuid_primary_key :id
+
+    attribute :user_id, :uuid, allow_nil?: false, public?: true
+
+    attribute :document_type, :atom,
+      constraints: [one_of: [:invoice, :credit_note]],
+      allow_nil?: false,
+      public?: true
+
+    attribute :next_number, :integer, default: 1, allow_nil?: false, public?: true
+
+    # Timestamps
+    create_timestamp :inserted_at
+    update_timestamp :updated_at
+  end
+
+  relationships do
+    belongs_to :user, AshTypescriptReactExample.Accounts.User do
+      allow_nil? false
+      attribute_writable? false
     end
   end
 
