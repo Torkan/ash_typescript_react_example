@@ -36,7 +36,7 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
 
   # Clean TypeScript type name
   typescript do
-    type_name("CreditNote")
+    type_name "CreditNote"
   end
 
   # State machine will be implemented in task 13

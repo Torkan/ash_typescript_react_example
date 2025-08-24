@@ -4,6 +4,7 @@
     :ash_authentication,
     :ash_postgres,
     :ash_phoenix,
+    :ash_typescript,
     :ash,
     :reactor,
     :ecto,
