@@ -4,7 +4,7 @@ import {
   listCompanies,
   deleteCompany,
   buildCSRFHeaders,
-  InferListCompaniesResult,
+  ListCompaniesResult,
   ListCompaniesFields,
 } from "../../ash_rpc";
 
@@ -38,7 +38,7 @@ async function fetchCompanies() {
 
 export default function Companies({}: CompaniesPageProps) {
   const [companies, setCompanies] = useState<
-    InferListCompaniesResult<typeof companyFields>
+    Extract<ListCompaniesResult<typeof companyFields>, { success: true }>["data"]
   >([]);
 
   const [loading, setLoading] = useState(true);

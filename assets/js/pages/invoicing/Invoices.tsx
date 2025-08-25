@@ -14,7 +14,7 @@ interface InvoicesPageProps {
   page_title: string;
 }
 
-export default function Invoices({ current_user_id }: InvoicesPageProps) {
+export default function Invoices({}: InvoicesPageProps) {
   const [invoices, setInvoices] = useState<InvoiceResourceSchema[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

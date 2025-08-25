@@ -22,7 +22,7 @@ interface InvoiceLine {
   taxRate: string;
 }
 
-export default function NewInvoice({ current_user_id }: NewInvoicePageProps) {
+export default function NewInvoice({}: NewInvoicePageProps) {
   const [companies, setCompanies] = useState<CompanyResourceSchema[]>([]);
   const [customers, setCustomers] = useState<CustomerResourceSchema[]>([]);
   const [loading, setLoading] = useState(true);

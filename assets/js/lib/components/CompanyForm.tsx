@@ -1,5 +1,4 @@
 import React from "react";
-import { InferListCompaniesResult, ListCompaniesFields } from "../../ash_rpc";
 
 export interface CompanyFormData {
   name: string;

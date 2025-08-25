@@ -14,7 +14,7 @@ interface CreditNotesPageProps {
   page_title: string;
 }
 
-export default function CreditNotes({ current_user_id }: CreditNotesPageProps) {
+export default function CreditNotes({}: CreditNotesPageProps) {
   const [creditNotes, setCreditNotes] = useState<CreditNoteResourceSchema[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -24,7 +24,7 @@ interface CreditNoteLine {
   taxRate: string;
 }
 
-export default function NewCreditNote({ current_user_id }: NewCreditNotePageProps) {
+export default function NewCreditNote({}: NewCreditNotePageProps) {
   const [companies, setCompanies] = useState<CompanyResourceSchema[]>([]);
   const [customers, setCustomers] = useState<CustomerResourceSchema[]>([]);
   const [invoices, setInvoices] = useState<InvoiceResourceSchema[]>([]);

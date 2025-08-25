@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "lint": "eslint .",
-    "type-check": "tsc --noEmit",
-    "type-check:watch": "tsc --noEmit --watch",
+    "type-check": "tsc --noEmit --project tsconfig.app.json",
+    "type-check:watch": "tsc --watch --noEmit --project tsconfig.app.json",
     "type-check:watch-colored": "./scripts/type-check-colored.sh",
     "preview": "vite preview",
     "dev": "vite --config vite.config.ts",
