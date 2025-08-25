@@ -1,17 +1,15 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React from "react";
 import { router } from "@inertiajs/react";
 import { Link } from "@inertiajs/react";
-import { z } from "zod";
 import {
   createCompany,
   createCompanyZodschema,
   validateCreateCompany,
   buildCSRFHeaders,
+  CreateCompanyInput,
 } from "../../ash_rpc";
-import CompanyForm, {
-  CompanyFormData,
-  CompanyFormFieldErrors,
-} from "../../lib/components/CompanyForm";
+import CompanyForm, { CompanyFormData } from "$lib/components/CompanyForm";
+import { useAshRpcForm } from "$lib/useAshRpcForm";
 
 interface NewCompanyPageProps {
   current_user_id: string;
@@ -20,135 +18,38 @@ interface NewCompanyPageProps {
 }
 
 export default function NewCompany({}: NewCompanyPageProps) {
-  const [error, setError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<CompanyFormFieldErrors>({});
-  const [formData, setFormData] = useState<CompanyFormData>({
-    name: "",
-    addressLine1: "",
-    addressLine2: "",
-    city: "",
-    postalCode: "",
-    country: "Norway",
-    vatNumber: "",
-    email: "",
-    phone: "",
-    isDefault: false,
-  });
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Cleanup debounce timer on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, []);
-
-  const validateForm = (data: CompanyFormData): CompanyFormFieldErrors => {
-    const result = createCompanyZodschema.safeParse(data);
-    const errors: CompanyFormFieldErrors = {};
-
-    if (!result.success) {
-      // Use treeifyError for cleaner error structure
-      const tree = z.treeifyError(result.error);
-
-      // Extract field errors from the tree structure
-      if (tree.properties) {
-        Object.entries(tree.properties).forEach(([fieldName, fieldError]) => {
-          if (fieldError && fieldError.errors && fieldError.errors.length > 0) {
-            const key = fieldName as keyof CompanyFormFieldErrors;
-            errors[key] = fieldError.errors; // Keep all error messages
-          }
+  const { formData, fieldErrors, handleChange, handleSubmit, error } =
+    useAshRpcForm<CompanyFormData, CreateCompanyInput>({
+      initialData: {
+        name: "",
+        addressLine1: "",
+        addressLine2: "",
+        city: "",
+        postalCode: "",
+        country: "Norway",
+        vatNumber: "",
+        email: "",
+        phone: "",
+        isDefault: false,
+      },
+      zodSchema: createCompanyZodschema,
+      serverValidation: async (data) => {
+        return validateCreateCompany({
+          input: data,
+          headers: buildCSRFHeaders(),
         });
-      }
-    }
-
-    return errors;
-  };
-
-  const performServerValidation = useCallback(async (data: CompanyFormData) => {
-    try {
-      const result = await validateCreateCompany({
-        input: data,
-        headers: buildCSRFHeaders(),
-      });
-
-      if (!result.success) {
-        const serverErrors: CompanyFormFieldErrors = {};
-
-        result.errors.forEach((error) => {
-          if (error.type === "validation_error" && error.field) {
-            const fieldName = error.field as keyof CompanyFormFieldErrors;
-            // Ensure we have an array of error messages
-            if (!serverErrors[fieldName]) {
-              serverErrors[fieldName] = [];
-            }
-            // Add the error message to the array
-            serverErrors[fieldName]!.push(error.message);
-          }
+      },
+      onSubmit: async (data) => {
+        return createCompany({
+          input: data,
+          fields: ["id"],
+          headers: buildCSRFHeaders(),
         });
-
-        // Merge server errors with existing client-side errors
-        setFieldErrors((prevErrors) => ({
-          ...prevErrors,
-          ...serverErrors,
-        }));
-      }
-    } catch (err) {
-      console.error("Server validation error:", err);
-    }
-  }, []);
-
-  const handleChange = (newFormData: CompanyFormData) => {
-    setFormData(newFormData);
-
-    // Real-time validation - validate as user types
-    const validationErrors = validateForm(newFormData);
-    setFieldErrors(validationErrors);
-
-    // Only perform server validation if client-side validation passes
-    if (Object.keys(validationErrors).length === 0) {
-      // Cancel previous debounce timer
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-
-      // Set new debounce timer for server validation
-      debounceTimerRef.current = setTimeout(() => {
-        performServerValidation(newFormData);
-      }, 300);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    // Final validation before submit
-    const validationErrors = validateForm(formData);
-    setFieldErrors(validationErrors);
-
-    if (Object.keys(validationErrors).length > 0) {
-      setError("Please fix the validation errors below");
-      return;
-    }
-
-    try {
-      const result = await createCompany({
-        input: formData,
-        fields: ["id"],
-        headers: buildCSRFHeaders(),
-      });
-      if (!result.success) {
-        throw new Error(result.errors.map((e) => e.message).join(", "));
-      }
-      router.visit("/companies");
-    } catch (err) {
-      setError("Failed to create company");
-      console.error(err);
-    }
-  };
+      },
+      onSuccess: () => {
+        router.visit("/companies");
+      },
+    });
 
   const handleCancel = () => {
     router.visit("/companies");
