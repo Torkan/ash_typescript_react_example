@@ -106,7 +106,6 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
     update :update do
       primary? true
       require_atomic? false
-      # State validation ensures only draft credit notes can be updated
 
       accept [
         :issue_date,
@@ -135,6 +134,9 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
 
       argument :credit_note_lines, {:array, :map}, default: []
 
+      validate attribute_in(:state, [:draft]),
+        message: "can only update draft credit notes"
+
       change manage_relationship(:credit_note_lines, type: :direct_control)
     end
 
@@ -162,6 +164,8 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
       # Transition credit note to finalized state and assign serial number
       accept []
       require_atomic? false
+
+      change transition_state(:finalized)
 
       change fn changeset, _context ->
         user_id = Ash.Changeset.get_attribute(changeset, :user_id)
@@ -216,7 +220,7 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
       accept []
       require_atomic? false
 
-      # State machine will handle the state transition automatically
+      change transition_state(:cancelled)
     end
   end
 
@@ -231,10 +235,6 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
   end
 
   validations do
-    validate attribute_in(:state, [:draft]),
-      message: "can only update draft credit notes",
-      on: [:update]
-
     validate string_length(:credit_reason, min: 1),
       message: "cannot be empty"
   end

@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { Link } from "@inertiajs/react";
 import { 
-  listCreditNotes,
   deleteCreditNote,
   finalizeCreditNote,
   cancelCreditNote,
   buildCSRFHeaders,
-  ListCreditNotesResult,
-  ListCreditNotesFields,
+  CreditNotesListView,
 } from "../../ash_rpc";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
 
@@ -14,50 +13,14 @@ interface CreditNotesPageProps {
   current_user_id: string;
   locale: string;
   page_title: string;
+  credit_notes: CreditNotesListView;
 }
 
-const creditNoteFields = [
-  'id', 'serialNumber', 'state', 'issueDate', 'creditReason',
-  'customerName', 'companyName', 'currency', 'originalInvoiceId'
-] satisfies ListCreditNotesFields;
 
-// Helper function to fetch credit notes with proper typing
-async function fetchCreditNotes() {
-  return await listCreditNotes({
-    fields: creditNoteFields,
-    headers: buildCSRFHeaders(),
-  });
-}
-
-export default function CreditNotes({ locale }: CreditNotesPageProps) {
-  const [creditNotes, setCreditNotes] = useState<
-    Extract<ListCreditNotesResult<typeof creditNoteFields>, { success: true }>["data"]
-  >([]);
-  const [loading, setLoading] = useState(true);
+export default function CreditNotes({ credit_notes: initialCreditNotes, locale }: CreditNotesPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "draft" | "finalized" | "cancelled">("all");
 
-  useEffect(() => {
-    loadCreditNotes();
-  }, []);
-
-  const loadCreditNotes = async () => {
-    try {
-      setLoading(true);
-      const result = await fetchCreditNotes();
-      if (result.success) {
-        setCreditNotes(result.data);
-      } else {
-        throw new Error(result.errors.map(e => e.message).join(', '));
-      }
-      setError(null);
-    } catch (err) {
-      setError("Failed to load credit notes");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleFinalize = async (id: string) => {
     if (confirm("Are you sure you want to finalize this credit note? This action cannot be undone.")) {
@@ -70,7 +33,7 @@ export default function CreditNotes({ locale }: CreditNotesPageProps) {
         if (!result.success) {
           throw new Error(result.errors.map(e => e.message).join(', '));
         }
-        await loadCreditNotes();
+        window.location.reload();
       } catch (err) {
         setError("Failed to finalize credit note");
         console.error(err);
@@ -89,7 +52,7 @@ export default function CreditNotes({ locale }: CreditNotesPageProps) {
         if (!result.success) {
           throw new Error(result.errors.map(e => e.message).join(', '));
         }
-        await loadCreditNotes();
+        window.location.reload();
       } catch (err) {
         setError("Failed to cancel credit note");
         console.error(err);
@@ -107,7 +70,7 @@ export default function CreditNotes({ locale }: CreditNotesPageProps) {
         if (!result.success) {
           throw new Error(result.errors.map(e => e.message).join(', '));
         }
-        await loadCreditNotes();
+        window.location.reload();
       } catch (err) {
         setError("Failed to delete credit note");
         console.error(err);
@@ -133,30 +96,20 @@ export default function CreditNotes({ locale }: CreditNotesPageProps) {
   };
 
   const filteredCreditNotes = filter === "all" 
-    ? creditNotes 
-    : creditNotes.filter(cn => cn.state === filter);
-
-  if (loading) {
-    return (
-      <InvoicingLayout locale={locale}>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-lg">Loading credit notes...</div>
-        </div>
-      </InvoicingLayout>
-    );
-  }
+    ? initialCreditNotes 
+    : initialCreditNotes.filter(cn => cn.state === filter);
 
   return (
     <InvoicingLayout locale={locale}>
       <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Credit Notes</h1>
-        <a
+        <Link
           href="/credit-notes/new"
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
         >
           New Credit Note
-        </a>
+        </Link>
       </div>
 
       {error && (
@@ -170,25 +123,25 @@ export default function CreditNotes({ locale }: CreditNotesPageProps) {
           onClick={() => setFilter("all")}
           className={`px-3 py-1 rounded ${filter === "all" ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
         >
-          All ({creditNotes.length})
+          All ({initialCreditNotes.length})
         </button>
         <button
           onClick={() => setFilter("draft")}
           className={`px-3 py-1 rounded ${filter === "draft" ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
         >
-          Draft ({creditNotes.filter(cn => cn.state === "draft").length})
+          Draft ({initialCreditNotes.filter(cn => cn.state === "draft").length})
         </button>
         <button
           onClick={() => setFilter("finalized")}
           className={`px-3 py-1 rounded ${filter === "finalized" ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
         >
-          Finalized ({creditNotes.filter(cn => cn.state === "finalized").length})
+          Finalized ({initialCreditNotes.filter(cn => cn.state === "finalized").length})
         </button>
         <button
           onClick={() => setFilter("cancelled")}
           className={`px-3 py-1 rounded ${filter === "cancelled" ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
         >
-          Cancelled ({creditNotes.filter(cn => cn.state === "cancelled").length})
+          Cancelled ({initialCreditNotes.filter(cn => cn.state === "cancelled").length})
         </button>
       </div>
 
@@ -250,14 +203,20 @@ export default function CreditNotes({ locale }: CreditNotesPageProps) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex gap-2">
+                    <Link
+                      href={`/credit-notes/${creditNote.id}`}
+                      className="text-blue-600 hover:text-blue-900"
+                    >
+                      View
+                    </Link>
                     {creditNote.state === 'draft' && (
                       <>
-                        <a
+                        <Link
                           href={`/credit-notes/${creditNote.id}/edit`}
                           className="text-blue-600 hover:text-blue-900"
                         >
                           Edit
-                        </a>
+                        </Link>
                         <button
                           onClick={() => handleFinalize(creditNote.id)}
                           className="text-green-600 hover:text-green-900"
@@ -277,12 +236,6 @@ export default function CreditNotes({ locale }: CreditNotesPageProps) {
                           Delete
                         </button>
                       </>
-                    )}
-                    {creditNote.state === 'finalized' && (
-                      <span className="text-gray-400">View</span>
-                    )}
-                    {creditNote.state === 'cancelled' && (
-                      <span className="text-gray-400">-</span>
                     )}
                   </div>
                 </td>

@@ -85,14 +85,13 @@ defmodule AshTypescriptReactExample.Invoicing.Invoice do
 
       change relate_actor(:user)
       change set_attribute(:user_id, actor(:id))
-      
+
       change manage_relationship(:invoice_lines, type: :direct_control)
     end
 
     update :update do
       primary? true
       require_atomic? false
-      # State validation ensures only draft invoices can be updated
 
       accept [
         :issue_date,
@@ -119,12 +118,11 @@ defmodule AshTypescriptReactExample.Invoicing.Invoice do
       ]
 
       argument :invoice_lines, {:array, :map}, default: []
-      
-      change manage_relationship(:invoice_lines, type: :direct_control)
-    end
 
-    read :list do
-      # Will be used for listing invoices for a user
+      validate attribute_in(:state, [:draft]),
+        message: "can only update draft invoices"
+
+      change manage_relationship(:invoice_lines, type: :direct_control)
     end
 
     read :list_by_state do
@@ -188,6 +186,8 @@ defmodule AshTypescriptReactExample.Invoicing.Invoice do
             )
         end
       end
+
+      change transition_state(:finalized)
     end
 
     update :cancel do
@@ -195,7 +195,7 @@ defmodule AshTypescriptReactExample.Invoicing.Invoice do
       accept []
       require_atomic? false
 
-      # State machine will handle the state transition automatically
+      change transition_state(:cancelled)
     end
   end
 
@@ -219,11 +219,6 @@ defmodule AshTypescriptReactExample.Invoicing.Invoice do
     validate compare(:due_date, greater_than: :issue_date),
       message: "must be after issue date",
       on: [:create, :update]
-
-    # Only draft invoices can be updated (finalize and cancel have their own logic)
-    validate attribute_in(:state, [:draft]),
-      message: "can only update draft invoices",
-      on: [:update]
 
     # Serial number validations will be enforced through state machine transitions
     # and business logic rather than complex conditional validations
@@ -302,7 +297,7 @@ defmodule AshTypescriptReactExample.Invoicing.Invoice do
 
   # Aggregates for financial calculations
   aggregates do
-    # Calculate sum of line_total from invoice_lines 
+    # Calculate sum of line_total from invoice_lines
     sum :subtotal_amount, :invoice_lines, :line_total do
       default Decimal.new(0)
     end

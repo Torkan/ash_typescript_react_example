@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { 
+import {
   listCompanies,
   listActiveCustomers,
   listInvoicesByState,
@@ -7,9 +7,19 @@ import {
   ListCompaniesFields,
   ListActiveCustomersFields,
   ListInvoicesByStateFields,
+  createCreditNote,
+  createCreditNoteZodschema,
+  validateCreateCreditNote,
+  CreateCreditNoteInput,
 } from "../../ash_rpc";
-import CreditNoteForm, { CompanyType, CustomerType, InvoiceType } from "../../lib/components/CreditNoteForm";
+import CreditNoteForm, { 
+  CompanyType, 
+  CustomerType, 
+  InvoiceType, 
+  CreditNoteFormData
+} from "../../lib/components/CreditNoteForm";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
+import { useAshRpcForm } from "../../lib/useAshRpcForm";
 
 interface NewCreditNotePageProps {
   current_user_id: string;
@@ -38,6 +48,52 @@ export default function NewCreditNote({ locale }: NewCreditNotePageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { formData, fieldErrors, handleChange, handleSubmit, error: formError } =
+    useAshRpcForm<CreditNoteFormData, CreateCreditNoteInput>({
+      initialData: {
+        issueDate: new Date().toISOString().split("T")[0],
+        creditReason: "",
+        currency: "NOK",
+        originalInvoiceId: null,
+        companyName: "",
+        companyAddressLine1: "",
+        companyAddressLine2: "",
+        companyCity: "",
+        companyPostalCode: "",
+        companyCountry: "",
+        companyVatNumber: "",
+        companyEmail: "",
+        companyPhone: "",
+        customerName: "",
+        customerAddressLine1: "",
+        customerAddressLine2: "",
+        customerCity: "",
+        customerPostalCode: "",
+        customerCountry: "",
+        customerVatNumber: "",
+        customerEmail: "",
+        customerPhone: "",
+        creditNoteLines: [],
+      },
+      zodSchema: createCreditNoteZodschema,
+      serverValidation: async (data) => {
+        return validateCreateCreditNote({
+          input: data,
+          headers: buildCSRFHeaders(),
+        });
+      },
+      onSubmit: async (data) => {
+        return createCreditNote({
+          input: data,
+          fields: ["id"],
+          headers: buildCSRFHeaders(),
+        });
+      },
+      onSuccess: () => {
+        window.location.href = "/credit-notes";
+      },
+    });
+
   useEffect(() => {
     loadData();
   }, []);
@@ -58,33 +114,29 @@ export default function NewCreditNote({ locale }: NewCreditNotePageProps) {
           input: { state: 'finalized' },
           fields: invoiceFields,
           headers: buildCSRFHeaders(),
-        })
+        }),
       ]);
       
       if (!companiesResult.success) {
-        throw new Error(companiesResult.errors.map(e => e.message).join(', '));
+        throw new Error(companiesResult.errors.map((e) => e.message).join(", "));
       }
       if (!customersResult.success) {
-        throw new Error(customersResult.errors.map(e => e.message).join(', '));
+        throw new Error(customersResult.errors.map((e) => e.message).join(", "));
       }
       if (!invoicesResult.success) {
-        throw new Error(invoicesResult.errors.map(e => e.message).join(', '));
+        throw new Error(invoicesResult.errors.map((e) => e.message).join(", "));
       }
       
-      setCompanies(companiesResult.data);
+      setCompanies(companiesResult.data.results);
       setCustomers(customersResult.data);
       setInvoices(invoicesResult.data);
       setError(null);
     } catch (err) {
-      setError("Failed to load data");
+      setError(err instanceof Error ? err.message : "Failed to load data");
       console.error(err);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSuccess = () => {
-    window.location.href = '/credit-notes';
   };
 
   const handleCancel = () => {
@@ -101,12 +153,12 @@ export default function NewCreditNote({ locale }: NewCreditNotePageProps) {
     );
   }
 
-  if (error) {
+  if (error || formError) {
     return (
       <InvoicingLayout locale={locale}>
         <div className="container mx-auto px-4 py-8">
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
+            {error || formError}
           </div>
           <button
             onClick={loadData}
@@ -125,8 +177,12 @@ export default function NewCreditNote({ locale }: NewCreditNotePageProps) {
         companies={companies}
         customers={customers}
         invoices={invoices}
-        onSuccess={handleSuccess}
+        formData={formData}
+        fieldErrors={fieldErrors}
+        onChange={handleChange}
+        onSubmit={handleSubmit}
         onCancel={handleCancel}
+        isEditing={false}
       />
     </InvoicingLayout>
   );

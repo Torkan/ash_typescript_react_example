@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "@inertiajs/react";
 import { useAshRpcForm } from "../../lib/useAshRpcForm";
 import {
   createCustomer,
@@ -63,12 +64,12 @@ export default function NewCustomer({ locale }: NewCustomerPageProps) {
       <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Create Customer</h1>
-        <a
+        <Link
           href="/customers"
           className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
         >
           Back to Customers
-        </a>
+        </Link>
       </div>
 
       {error && (
@@ -248,12 +249,12 @@ export default function NewCustomer({ locale }: NewCustomerPageProps) {
             >
               {isSubmitting ? "Creating..." : "Create Customer"}
             </button>
-            <a
+            <Link
               href="/customers"
               className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded inline-block text-center"
             >
               Cancel
-            </a>
+            </Link>
           </div>
         </form>
       </div>

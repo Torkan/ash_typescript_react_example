@@ -1,5 +1,5 @@
-import React from "react";
-import { router } from "@inertiajs/react";
+import React, { useState, useEffect } from "react";
+import { router, Link } from "@inertiajs/react";
 
 interface Props {
   locale: string;
@@ -7,6 +7,12 @@ interface Props {
 }
 
 export default function InvoicingLayout({ locale, children }: Props) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const handleLocaleChange = (newLocale: string) => {
     if (typeof window !== 'undefined') {
       const currentUrl = window.location.pathname + window.location.search;
@@ -17,12 +23,13 @@ export default function InvoicingLayout({ locale, children }: Props) {
   const navigationItems = [
     { href: "/companies", label: "Companies" },
     { href: "/customers", label: "Customers" },
-    { href: "/invoices", label: "Invoices" },
+    { href: "/invoices", label: "Invoices - Keyset" },
+    { href: "/invoices-offset", label: "Invoices - Offset" },
     { href: "/credit-notes", label: "Credit Notes" },
   ];
 
   const isActive = (href: string) => {
-    if (typeof window === 'undefined') return false;
+    if (!mounted) return false;
     return window.location.pathname.startsWith(href);
   };
 
@@ -35,7 +42,7 @@ export default function InvoicingLayout({ locale, children }: Props) {
             {/* Navigation Menu */}
             <nav className="flex space-x-1">
               {navigationItems.map((item) => (
-                <a
+                <Link
                   key={item.href}
                   href={item.href}
                   className={`btn btn-sm ${
@@ -43,7 +50,7 @@ export default function InvoicingLayout({ locale, children }: Props) {
                   }`}
                 >
                   {item.label}
-                </a>
+                </Link>
               ))}
             </nav>
 

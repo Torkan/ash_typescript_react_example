@@ -1,21 +1,33 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "@inertiajs/react";
 import {
+  buildCSRFHeaders,
+  InvoiceEditView,
   listCompanies,
   listActiveCustomers,
   getInvoice,
-  buildCSRFHeaders,
+  updateInvoice,
+  updateInvoiceZodschema,
+  validateUpdateInvoice,
+  UpdateInvoiceInput,
   ListCompaniesFields,
   ListActiveCustomersFields,
   GetInvoiceFields,
 } from "../../ash_rpc";
-import InvoiceForm, { CompanyType, CustomerType } from "../../lib/components/InvoiceForm";
+import InvoiceForm, { 
+  CompanyType, 
+  CustomerType, 
+  InvoiceFormData
+} from "../../lib/components/InvoiceForm";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
+import { useAshRpcForm } from "../../lib/useAshRpcForm";
 
 interface EditInvoicePageProps {
   current_user_id: string;
   locale: string;
   page_title: string;
   invoice_id: string;
+  invoice: InvoiceEditView | null;
 }
 
 const companyFields = [
@@ -62,9 +74,86 @@ export default function EditInvoice({ locale, invoice_id }: EditInvoicePageProps
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { formData, fieldErrors, handleChange, handleSubmit, error: formError } =
+    useAshRpcForm<InvoiceFormData, UpdateInvoiceInput>({
+      initialData: {
+        issueDate: "",
+        dueDate: "",
+        currency: "NOK",
+        companyName: "",
+        companyAddressLine1: "",
+        companyAddressLine2: "",
+        companyCity: "",
+        companyPostalCode: "",
+        companyCountry: "",
+        companyVatNumber: "",
+        companyEmail: "",
+        companyPhone: "",
+        customerName: "",
+        customerAddressLine1: "",
+        customerAddressLine2: "",
+        customerCity: "",
+        customerPostalCode: "",
+        customerCountry: "",
+        customerVatNumber: "",
+        customerEmail: "",
+        customerPhone: "",
+        invoiceLines: [],
+      },
+      zodSchema: updateInvoiceZodschema,
+      serverValidation: async (data) => {
+        return validateUpdateInvoice({
+          primaryKey: invoice_id,
+          input: data,
+          headers: buildCSRFHeaders(),
+        });
+      },
+      onSubmit: async (data) => {
+        return updateInvoice({
+          primaryKey: invoice_id,
+          input: data,
+          fields: ["id"],
+          headers: buildCSRFHeaders(),
+        });
+      },
+      onSuccess: () => {
+        window.location.href = "/invoices";
+      },
+    });
+
   useEffect(() => {
     loadData();
   }, [invoice_id]);
+
+  // Update form data when invoice is loaded
+  useEffect(() => {
+    if (invoice) {
+      handleChange({
+        issueDate: invoice.issueDate,
+        dueDate: invoice.dueDate,
+        currency: invoice.currency || "NOK",
+        companyName: invoice.companyName || "",
+        companyAddressLine1: invoice.companyAddressLine1 || "",
+        companyAddressLine2: invoice.companyAddressLine2 || "",
+        companyCity: invoice.companyCity || "",
+        companyPostalCode: invoice.companyPostalCode || "",
+        companyCountry: invoice.companyCountry || "",
+        companyVatNumber: invoice.companyVatNumber || "",
+        companyEmail: invoice.companyEmail || "",
+        companyPhone: invoice.companyPhone || "",
+        customerName: invoice.customerName || "",
+        customerAddressLine1: invoice.customerAddressLine1 || "",
+        customerAddressLine2: invoice.customerAddressLine2 || "",
+        customerCity: invoice.customerCity || "",
+        customerPostalCode: invoice.customerPostalCode || "",
+        customerCountry: invoice.customerCountry || "",
+        customerVatNumber: invoice.customerVatNumber || "",
+        customerEmail: invoice.customerEmail || "",
+        customerPhone: invoice.customerPhone || "",
+        invoiceLines: invoice.invoiceLines || [],
+      });
+    }
+  }, [invoice, handleChange]);
 
   const loadData = async () => {
     try {
@@ -97,7 +186,7 @@ export default function EditInvoice({ locale, invoice_id }: EditInvoicePageProps
         throw new Error(invoiceResult.errors.map(e => e.message).join(', '));
       }
 
-      setCompanies(companiesResult.data);
+      setCompanies(companiesResult.data.results);
       setCustomers(customersResult.data);
       
       setInvoice(invoiceResult.data);
@@ -107,10 +196,6 @@ export default function EditInvoice({ locale, invoice_id }: EditInvoicePageProps
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSuccess = () => {
-    window.location.href = '/invoices';
   };
 
   const handleCancel = () => {
@@ -127,12 +212,12 @@ export default function EditInvoice({ locale, invoice_id }: EditInvoicePageProps
     );
   }
 
-  if (error) {
+  if (error || formError) {
     return (
       <InvoicingLayout locale={locale}>
         <div className="container mx-auto px-4 py-8">
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
+            {error || formError}
           </div>
           <button
             onClick={loadData}
@@ -140,12 +225,12 @@ export default function EditInvoice({ locale, invoice_id }: EditInvoicePageProps
           >
             Retry
           </button>
-          <a
+          <Link
             href="/invoices"
             className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded inline-block"
           >
             Back to Invoices
-          </a>
+          </Link>
         </div>
       </InvoicingLayout>
     );
@@ -156,9 +241,12 @@ export default function EditInvoice({ locale, invoice_id }: EditInvoicePageProps
       <InvoiceForm
         companies={companies}
         customers={customers}
-        onSuccess={handleSuccess}
+        formData={formData}
+        fieldErrors={fieldErrors}
+        onChange={handleChange}
+        onSubmit={handleSubmit}
         onCancel={handleCancel}
-        initialData={invoice}
+        isEditing={true}
       />
     </InvoicingLayout>
   );

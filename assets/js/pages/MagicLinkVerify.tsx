@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { router } from '@inertiajs/react';
+import { router, Link } from '@inertiajs/react';
 import { getI18n } from '$lib/i18n';
 import MagicLinkLayout from '$lib/components/MagicLinkLayout';
 
@@ -102,12 +102,12 @@ export default function MagicLinkVerify({ token = "", errors = {}, flash = {}, l
                 </div>
 
                 <div className="text-center mt-4">
-                  <a
+                  <Link
                     href="/sign-in"
                     className="link link-primary text-sm"
                   >
                     {t("auth.requestNewLink")}
-                  </a>
+                  </Link>
                 </div>
               </form>
             </div>

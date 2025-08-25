@@ -51,7 +51,7 @@ defmodule AshTypescriptReactExample.MixProject do
       {:ash_phoenix, "~> 2.0"},
       {:ash, "~> 3.5", override: true},
       {:ash_state_machine, "~> 0.2"},
-      {:ash_typescript, path: "../ash_typescript"},
+      {:ash_typescript, git: "https://github.com/Torkan/ash_typescript", branch: "main"},
       {:igniter, "~> 0.6", only: [:dev, :test]},
       {:phoenix, "~> 1.8.0"},
       {:phoenix_ecto, "~> 4.5"},
@@ -92,12 +92,15 @@ defmodule AshTypescriptReactExample.MixProject do
       setup: ["deps.get", "ash.setup", "assets.setup", "assets.build", "run priv/repo/seeds.exs"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
+      "ash_postgres.reset": [
+        "ash_postgres.drop",
+        "ash_postgres.create",
+        "ash.migrate",
+        "run priv/repo/seeds.exs"
+      ],
       test: ["ash.setup --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": [
-        "tailwind ash_typescript_react_example",
-        "esbuild ash_typescript_react_example"
-      ],
+      "assets.build": ["cmd cd assets && bun install"],
       "assets.deploy": [
         "tailwind ash_typescript_react_example --minify",
         "esbuild ash_typescript_react_example --minify",

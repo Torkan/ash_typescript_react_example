@@ -1,4 +1,6 @@
 import React from "react";
+import InputField from "./InputField";
+import CheckboxInput from "./CheckboxInput";
 
 export interface CompanyFormData {
   name: string;
@@ -52,272 +54,83 @@ export default function CompanyForm({
         onSubmit={onSubmit}
         className="grid grid-cols-1 md:grid-cols-2 gap-4"
       >
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Company Name *
-          </label>
-          <input
-            type="text"
-            required
-            value={formData.name}
-            onChange={(e) => onChange({ ...formData, name: e.target.value })}
-            className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 ${
-              fieldErrors?.name && fieldErrors.name.length > 0
-                ? "border-red-300 focus:ring-red-500"
-                : "border-gray-300 focus:ring-blue-500"
-            }`}
-          />
-          {fieldErrors?.name && fieldErrors.name.length > 0 && (
-            <div className="mt-1">
-              {fieldErrors.name.map((error, index) => (
-                <p key={index} className="text-sm text-red-600">
-                  {error}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
+        <InputField
+          label="Company Name"
+          value={formData.name}
+          onChange={(value) => onChange({ ...formData, name: value })}
+          errors={fieldErrors?.name}
+          required
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Email
-          </label>
-          <input
-            type="email"
-            value={formData.email}
-            onChange={(e) => onChange({ ...formData, email: e.target.value })}
-            className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 ${
-              fieldErrors?.email && fieldErrors.email.length > 0
-                ? "border-red-300 focus:ring-red-500"
-                : "border-gray-300 focus:ring-blue-500"
-            }`}
-          />
-          {fieldErrors?.email && fieldErrors.email.length > 0 && (
-            <div className="mt-1">
-              {fieldErrors.email.map((error, index) => (
-                <p key={index} className="text-sm text-red-600">
-                  {error}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
+        <InputField
+          label="Email"
+          type="email"
+          value={formData.email}
+          onChange={(value) => onChange({ ...formData, email: value })}
+          errors={fieldErrors?.email}
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Address Line 1 *
-          </label>
-          <input
-            type="text"
-            required
-            value={formData.addressLine1}
-            onChange={(e) =>
-              onChange({ ...formData, addressLine1: e.target.value })
-            }
-            className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 ${
-              fieldErrors?.addressLine1 && fieldErrors.addressLine1.length > 0
-                ? "border-red-300 focus:ring-red-500"
-                : "border-gray-300 focus:ring-blue-500"
-            }`}
-          />
-          {fieldErrors?.addressLine1 && fieldErrors.addressLine1.length > 0 && (
-            <div className="mt-1">
-              {fieldErrors.addressLine1.map((error, index) => (
-                <p key={index} className="text-sm text-red-600">
-                  {error}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
+        <InputField
+          label="Address Line 1"
+          value={formData.addressLine1}
+          onChange={(value) => onChange({ ...formData, addressLine1: value })}
+          errors={fieldErrors?.addressLine1}
+          required
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Address Line 2
-          </label>
-          <input
-            type="text"
-            value={formData.addressLine2}
-            onChange={(e) =>
-              onChange({ ...formData, addressLine2: e.target.value })
-            }
-            className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 ${
-              fieldErrors?.addressLine2 && fieldErrors.addressLine2.length > 0
-                ? "border-red-300 focus:ring-red-500"
-                : "border-gray-300 focus:ring-blue-500"
-            }`}
-          />
-          {fieldErrors?.addressLine2 && fieldErrors.addressLine2.length > 0 && (
-            <div className="mt-1">
-              {fieldErrors.addressLine2.map((error, index) => (
-                <p key={index} className="text-sm text-red-600">
-                  {error}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
+        <InputField
+          label="Address Line 2"
+          value={formData.addressLine2}
+          onChange={(value) => onChange({ ...formData, addressLine2: value })}
+          errors={fieldErrors?.addressLine2}
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            City *
-          </label>
-          <input
-            type="text"
-            required
-            value={formData.city}
-            onChange={(e) => onChange({ ...formData, city: e.target.value })}
-            className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 ${
-              fieldErrors?.city && fieldErrors.city.length > 0
-                ? "border-red-300 focus:ring-red-500"
-                : "border-gray-300 focus:ring-blue-500"
-            }`}
-          />
-          {fieldErrors?.city && fieldErrors.city.length > 0 && (
-            <div className="mt-1">
-              {fieldErrors.city.map((error, index) => (
-                <p key={index} className="text-sm text-red-600">
-                  {error}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
+        <InputField
+          label="City"
+          value={formData.city}
+          onChange={(value) => onChange({ ...formData, city: value })}
+          errors={fieldErrors?.city}
+          required
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Postal Code *
-          </label>
-          <input
-            type="text"
-            required
-            value={formData.postalCode}
-            onChange={(e) =>
-              onChange({ ...formData, postalCode: e.target.value })
-            }
-            className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 ${
-              fieldErrors?.postalCode && fieldErrors.postalCode.length > 0
-                ? "border-red-300 focus:ring-red-500"
-                : "border-gray-300 focus:ring-blue-500"
-            }`}
-          />
-          {fieldErrors?.postalCode && fieldErrors.postalCode.length > 0 && (
-            <div className="mt-1">
-              {fieldErrors.postalCode.map((error, index) => (
-                <p key={index} className="text-sm text-red-600">
-                  {error}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
+        <InputField
+          label="Postal Code"
+          value={formData.postalCode}
+          onChange={(value) => onChange({ ...formData, postalCode: value })}
+          errors={fieldErrors?.postalCode}
+          required
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Country *
-          </label>
-          <input
-            type="text"
-            required
-            value={formData.country}
-            onChange={(e) => onChange({ ...formData, country: e.target.value })}
-            className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 ${
-              fieldErrors?.country && fieldErrors.country.length > 0
-                ? "border-red-300 focus:ring-red-500"
-                : "border-gray-300 focus:ring-blue-500"
-            }`}
-          />
-          {fieldErrors?.country && fieldErrors.country.length > 0 && (
-            <div className="mt-1">
-              {fieldErrors.country.map((error, index) => (
-                <p key={index} className="text-sm text-red-600">
-                  {error}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
+        <InputField
+          label="Country"
+          value={formData.country}
+          onChange={(value) => onChange({ ...formData, country: value })}
+          errors={fieldErrors?.country}
+          required
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            VAT Number
-          </label>
-          <input
-            type="text"
-            value={formData.vatNumber}
-            onChange={(e) =>
-              onChange({ ...formData, vatNumber: e.target.value })
-            }
-            className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 ${
-              fieldErrors?.vatNumber && fieldErrors.vatNumber.length > 0
-                ? "border-red-300 focus:ring-red-500"
-                : "border-gray-300 focus:ring-blue-500"
-            }`}
-          />
-          {fieldErrors?.vatNumber && fieldErrors.vatNumber.length > 0 && (
-            <div className="mt-1">
-              {fieldErrors.vatNumber.map((error, index) => (
-                <p key={index} className="text-sm text-red-600">
-                  {error}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
+        <InputField
+          label="VAT Number"
+          value={formData.vatNumber}
+          onChange={(value) => onChange({ ...formData, vatNumber: value })}
+          errors={fieldErrors?.vatNumber}
+        />
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Phone
-          </label>
-          <input
-            type="tel"
-            value={formData.phone}
-            onChange={(e) => onChange({ ...formData, phone: e.target.value })}
-            className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 ${
-              fieldErrors?.phone && fieldErrors.phone.length > 0
-                ? "border-red-300 focus:ring-red-500"
-                : "border-gray-300 focus:ring-blue-500"
-            }`}
-          />
-          {fieldErrors?.phone && fieldErrors.phone.length > 0 && (
-            <div className="mt-1">
-              {fieldErrors.phone.map((error, index) => (
-                <p key={index} className="text-sm text-red-600">
-                  {error}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
+        <InputField
+          label="Phone"
+          type="tel"
+          value={formData.phone}
+          onChange={(value) => onChange({ ...formData, phone: value })}
+          errors={fieldErrors?.phone}
+        />
 
-        <div className="flex flex-col">
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isDefault"
-              checked={formData.isDefault}
-              onChange={(e) =>
-                onChange({ ...formData, isDefault: e.target.checked })
-              }
-              className="mr-2"
-            />
-            <label
-              htmlFor="isDefault"
-              className="text-sm font-medium text-gray-700"
-            >
-              Set as default company
-            </label>
-          </div>
-          {fieldErrors?.isDefault && fieldErrors.isDefault.length > 0 && (
-            <div className="mt-1">
-              {fieldErrors.isDefault.map((error, index) => (
-                <p key={index} className="text-sm text-red-600">
-                  {error}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
+        <CheckboxInput
+          label="Set as default company"
+          checked={formData.isDefault}
+          onChange={(checked) => onChange({ ...formData, isDefault: checked })}
+          errors={fieldErrors?.isDefault}
+          id="isDefault"
+        />
 
         <div className="md:col-span-2 flex gap-2">
           <button

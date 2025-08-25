@@ -5,9 +5,18 @@ import {
   buildCSRFHeaders,
   ListCompaniesFields,
   ListActiveCustomersFields,
+  createInvoice,
+  createInvoiceZodschema,
+  validateCreateInvoice,
+  CreateInvoiceInput,
 } from "../../ash_rpc";
-import InvoiceForm, { CompanyType, CustomerType } from "../../lib/components/InvoiceForm";
+import InvoiceForm, {
+  CompanyType,
+  CustomerType,
+  InvoiceFormData,
+} from "../../lib/components/InvoiceForm";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
+import { useAshRpcForm } from "../../lib/useAshRpcForm";
 
 interface NewInvoicePageProps {
   current_user_id: string;
@@ -48,6 +57,58 @@ export default function NewInvoice({ locale }: NewInvoicePageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const {
+    formData,
+    fieldErrors,
+    handleChange,
+    handleSubmit,
+    error: formError,
+  } = useAshRpcForm<InvoiceFormData, CreateInvoiceInput>({
+    initialData: {
+      issueDate: new Date().toISOString().split("T")[0],
+      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0],
+      currency: "NOK",
+      companyName: "",
+      companyAddressLine1: "",
+      companyAddressLine2: "",
+      companyCity: "",
+      companyPostalCode: "",
+      companyCountry: "",
+      companyVatNumber: "",
+      companyEmail: "",
+      companyPhone: "",
+      customerName: "",
+      customerAddressLine1: "",
+      customerAddressLine2: "",
+      customerCity: "",
+      customerPostalCode: "",
+      customerCountry: "",
+      customerVatNumber: "",
+      customerEmail: "",
+      customerPhone: "",
+      invoiceLines: [],
+    },
+    zodSchema: createInvoiceZodschema,
+    serverValidation: async (data) => {
+      return validateCreateInvoice({
+        input: data,
+        headers: buildCSRFHeaders(),
+      });
+    },
+    onSubmit: async (data) => {
+      return createInvoice({
+        input: data,
+        fields: ["id"],
+        headers: buildCSRFHeaders(),
+      });
+    },
+    onSuccess: () => {
+      window.location.href = "/invoices";
+    },
+  });
+
   useEffect(() => {
     loadData();
   }, []);
@@ -77,7 +138,7 @@ export default function NewInvoice({ locale }: NewInvoicePageProps) {
         );
       }
 
-      setCompanies(companiesResult.data);
+      setCompanies(companiesResult.data.results);
       setCustomers(customersResult.data);
       setError(null);
     } catch (err) {
@@ -86,10 +147,6 @@ export default function NewInvoice({ locale }: NewInvoicePageProps) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSuccess = () => {
-    window.location.href = "/invoices";
   };
 
   const handleCancel = () => {
@@ -106,12 +163,12 @@ export default function NewInvoice({ locale }: NewInvoicePageProps) {
     );
   }
 
-  if (error) {
+  if (error || formError) {
     return (
       <InvoicingLayout locale={locale}>
         <div className="container mx-auto px-4 py-8">
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
+            {error || formError}
           </div>
           <button
             onClick={loadData}
@@ -129,8 +186,12 @@ export default function NewInvoice({ locale }: NewInvoicePageProps) {
       <InvoiceForm
         companies={companies}
         customers={customers}
-        onSuccess={handleSuccess}
+        formData={formData}
+        fieldErrors={fieldErrors}
+        onChange={handleChange}
+        onSubmit={handleSubmit}
         onCancel={handleCancel}
+        isEditing={false}
       />
     </InvoicingLayout>
   );

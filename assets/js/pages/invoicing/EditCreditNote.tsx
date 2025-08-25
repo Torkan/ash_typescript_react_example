@@ -1,17 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { 
+import { Link } from "@inertiajs/react";
+import {
+  buildCSRFHeaders,
   listCompanies,
   listActiveCustomers,
   listInvoicesByState,
   getCreditNote,
-  buildCSRFHeaders,
+  updateCreditNote,
+  updateCreditNoteZodschema,
+  validateUpdateCreditNote,
+  UpdateCreditNoteInput,
   ListCompaniesFields,
   ListActiveCustomersFields,
   ListInvoicesByStateFields,
   GetCreditNoteFields,
 } from "../../ash_rpc";
-import CreditNoteForm, { CompanyType, CustomerType, InvoiceType } from "../../lib/components/CreditNoteForm";
+import CreditNoteForm, { 
+  CompanyType, 
+  CustomerType, 
+  InvoiceType, 
+  CreditNoteFormData
+} from "../../lib/components/CreditNoteForm";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
+import { useAshRpcForm } from "../../lib/useAshRpcForm";
 
 interface EditCreditNotePageProps {
   current_user_id: string;
@@ -47,9 +58,88 @@ export default function EditCreditNote({ locale, credit_note_id }: EditCreditNot
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { formData, fieldErrors, handleChange, handleSubmit, error: formError } =
+    useAshRpcForm<CreditNoteFormData, UpdateCreditNoteInput>({
+      initialData: {
+        issueDate: "",
+        creditReason: "",
+        currency: "NOK",
+        originalInvoiceId: null,
+        companyName: "",
+        companyAddressLine1: "",
+        companyAddressLine2: "",
+        companyCity: "",
+        companyPostalCode: "",
+        companyCountry: "",
+        companyVatNumber: "",
+        companyEmail: "",
+        companyPhone: "",
+        customerName: "",
+        customerAddressLine1: "",
+        customerAddressLine2: "",
+        customerCity: "",
+        customerPostalCode: "",
+        customerCountry: "",
+        customerVatNumber: "",
+        customerEmail: "",
+        customerPhone: "",
+        creditNoteLines: [],
+      },
+      zodSchema: updateCreditNoteZodschema,
+      serverValidation: async (data) => {
+        return validateUpdateCreditNote({
+          primaryKey: credit_note_id,
+          input: data,
+          headers: buildCSRFHeaders(),
+        });
+      },
+      onSubmit: async (data) => {
+        return updateCreditNote({
+          primaryKey: credit_note_id,
+          input: data,
+          fields: ["id"],
+          headers: buildCSRFHeaders(),
+        });
+      },
+      onSuccess: () => {
+        window.location.href = "/credit-notes";
+      },
+    });
+
   useEffect(() => {
     loadData();
   }, [credit_note_id]);
+
+  // Update form data when credit note is loaded
+  useEffect(() => {
+    if (creditNote) {
+      handleChange({
+        issueDate: creditNote.issueDate,
+        creditReason: creditNote.creditReason || "",
+        currency: creditNote.currency || "NOK",
+        originalInvoiceId: creditNote.originalInvoiceId || null,
+        companyName: creditNote.companyName || "",
+        companyAddressLine1: creditNote.companyAddressLine1 || "",
+        companyAddressLine2: creditNote.companyAddressLine2 || "",
+        companyCity: creditNote.companyCity || "",
+        companyPostalCode: creditNote.companyPostalCode || "",
+        companyCountry: creditNote.companyCountry || "",
+        companyVatNumber: creditNote.companyVatNumber || "",
+        companyEmail: creditNote.companyEmail || "",
+        companyPhone: creditNote.companyPhone || "",
+        customerName: creditNote.customerName || "",
+        customerAddressLine1: creditNote.customerAddressLine1 || "",
+        customerAddressLine2: creditNote.customerAddressLine2 || "",
+        customerCity: creditNote.customerCity || "",
+        customerPostalCode: creditNote.customerPostalCode || "",
+        customerCountry: creditNote.customerCountry || "",
+        customerVatNumber: creditNote.customerVatNumber || "",
+        customerEmail: creditNote.customerEmail || "",
+        customerPhone: creditNote.customerPhone || "",
+        creditNoteLines: creditNote.creditNoteLines || [],
+      });
+    }
+  }, [creditNote, handleChange]);
 
   const loadData = async () => {
     try {
@@ -90,7 +180,7 @@ export default function EditCreditNote({ locale, credit_note_id }: EditCreditNot
         throw new Error(creditNoteResult.errors.map(e => e.message).join(', '));
       }
 
-      setCompanies(companiesResult.data);
+      setCompanies(companiesResult.data.results);
       setCustomers(customersResult.data);
       setInvoices(invoicesResult.data);
       setCreditNote(creditNoteResult.data);
@@ -100,10 +190,6 @@ export default function EditCreditNote({ locale, credit_note_id }: EditCreditNot
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSuccess = () => {
-    window.location.href = '/credit-notes';
   };
 
   const handleCancel = () => {
@@ -120,12 +206,12 @@ export default function EditCreditNote({ locale, credit_note_id }: EditCreditNot
     );
   }
 
-  if (error) {
+  if (error || formError) {
     return (
       <InvoicingLayout locale={locale}>
         <div className="container mx-auto px-4 py-8">
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
+            {error || formError}
           </div>
           <button
             onClick={loadData}
@@ -133,12 +219,12 @@ export default function EditCreditNote({ locale, credit_note_id }: EditCreditNot
           >
             Retry
           </button>
-          <a
+          <Link
             href="/credit-notes"
             className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded inline-block"
           >
             Back to Credit Notes
-          </a>
+          </Link>
         </div>
       </InvoicingLayout>
     );
@@ -150,9 +236,12 @@ export default function EditCreditNote({ locale, credit_note_id }: EditCreditNot
         companies={companies}
         customers={customers}
         invoices={invoices}
-        onSuccess={handleSuccess}
+        formData={formData}
+        fieldErrors={fieldErrors}
+        onChange={handleChange}
+        onSubmit={handleSubmit}
         onCancel={handleCancel}
-        initialData={creditNote}
+        isEditing={true}
       />
     </InvoicingLayout>
   );

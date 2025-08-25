@@ -39,7 +39,7 @@ async function fetchCompanies() {
 
 export default function Companies({ locale }: CompaniesPageProps) {
   const [companies, setCompanies] = useState<
-    Extract<ListCompaniesResult<typeof companyFields>, { success: true }>["data"]
+    Array<Extract<ListCompaniesResult<typeof companyFields>, { success: true }>["data"]["results"][0]>
   >([]);
 
   const [loading, setLoading] = useState(true);
@@ -54,7 +54,7 @@ export default function Companies({ locale }: CompaniesPageProps) {
       setLoading(true);
       const result = await fetchCompanies();
       if (result.success) {
-        setCompanies(result.data);
+        setCompanies(result.data.results);
       } else {
         throw new Error(result.errors.map((e) => e.message).join(", "));
       }
@@ -154,7 +154,7 @@ export default function Companies({ locale }: CompaniesPageProps) {
         ))}
       </div>
 
-      {companies.length === 0 && (
+      {!loading && companies.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           No companies found. Click "Add Company" to create your first company.
         </div>

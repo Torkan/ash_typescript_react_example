@@ -1,9 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useAshRpcForm } from "../useAshRpcForm";
-import {
-  buildCSRFHeaders,
-} from "../../ash_rpc";
-import { z } from "zod";
 
 export interface InvoiceLine {
   description: string;
@@ -39,20 +34,82 @@ export interface CustomerType {
   phone?: string | null;
 }
 
+export interface InvoiceFormData {
+  issueDate: string;
+  dueDate: string;
+  currency: string;
+  companyName: string;
+  companyAddressLine1: string;
+  companyAddressLine2: string;
+  companyCity: string;
+  companyPostalCode: string;
+  companyCountry: string;
+  companyVatNumber: string;
+  companyEmail: string;
+  companyPhone: string;
+  customerName: string;
+  customerAddressLine1: string;
+  customerAddressLine2: string;
+  customerCity: string;
+  customerPostalCode: string;
+  customerCountry: string;
+  customerVatNumber: string;
+  customerEmail: string;
+  customerPhone: string;
+  invoiceLines: Array<{
+    lineNumber: number;
+    description: string;
+    quantity: string;
+    unitPrice: string;
+    taxRate: string;
+  }>;
+}
+
+export interface InvoiceFormFieldErrors {
+  issueDate?: string[];
+  dueDate?: string[];
+  currency?: string[];
+  companyName?: string[];
+  companyAddressLine1?: string[];
+  companyAddressLine2?: string[];
+  companyCity?: string[];
+  companyPostalCode?: string[];
+  companyCountry?: string[];
+  companyVatNumber?: string[];
+  companyEmail?: string[];
+  companyPhone?: string[];
+  customerName?: string[];
+  customerAddressLine1?: string[];
+  customerAddressLine2?: string[];
+  customerCity?: string[];
+  customerPostalCode?: string[];
+  customerCountry?: string[];
+  customerVatNumber?: string[];
+  customerEmail?: string[];
+  customerPhone?: string[];
+  invoiceLines?: string[];
+}
+
 interface InvoiceFormProps {
   companies: CompanyType[];
   customers: CustomerType[];
-  onSuccess: () => void;
+  formData: InvoiceFormData;
+  fieldErrors?: InvoiceFormFieldErrors;
+  onChange: (data: InvoiceFormData) => void;
+  onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
-  initialData?: Partial<CreateInvoiceInput>;
+  isEditing: boolean;
 }
 
 export default function InvoiceForm({
   companies,
   customers,
-  onSuccess,
+  formData,
+  fieldErrors,
+  onChange,
+  onSubmit,
   onCancel,
-  initialData,
+  isEditing,
 }: InvoiceFormProps) {
   const [selectedCompany, setSelectedCompany] = useState<CompanyType | null>(
     null,
@@ -64,67 +121,15 @@ export default function InvoiceForm({
     { description: "", quantity: "1", unitPrice: "", taxRate: "25" },
   ]);
 
-  const {
-    formData,
-    fieldErrors,
-    handleChange,
-    handleSubmit,
-    isSubmitting,
-    error,
-  } = useAshRpcForm<CreateInvoiceInput, CreateInvoiceInput>({
-    initialData: {
-      issueDate: new Date().toISOString().split("T")[0],
-      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split("T")[0],
-      currency: "NOK",
-      companyName: "",
-      companyAddressLine1: "",
-      companyAddressLine2: "",
-      companyCity: "",
-      companyPostalCode: "",
-      companyCountry: "",
-      companyVatNumber: "",
-      companyEmail: "",
-      companyPhone: "",
-      customerName: "",
-      customerAddressLine1: "",
-      customerAddressLine2: "",
-      customerCity: "",
-      customerPostalCode: "",
-      customerCountry: "",
-      customerVatNumber: "",
-      customerEmail: "",
-      customerPhone: "",
-      invoiceLines: [],
-      ...initialData,
-    },
-    zodSchema: createInvoiceZodschema,
-    serverValidation: async (data) => {
-      return validateCreateInvoice({
-        input: data,
-        headers: buildCSRFHeaders(),
-      });
-    },
-    onSubmit: async (data) => {
-      return createInvoice({
-        input: data,
-        fields: ["id"],
-        headers: buildCSRFHeaders(),
-      });
-    },
-    onSuccess,
-  });
-
   // Auto-select default company on mount
   useEffect(() => {
     const defaultCompany = companies.find((c) => c.isDefault);
     if (defaultCompany && !selectedCompany) {
       handleCompanySelect(defaultCompany.id);
     }
-  }, [companies]);
+  }, [companies, selectedCompany]);
 
-  // Sync lines with form data
+  // Sync lines with form data when lines change
   useEffect(() => {
     const invoiceLines = lines
       .filter((line) => line.description && line.unitPrice)
@@ -136,17 +141,36 @@ export default function InvoiceForm({
         taxRate: line.taxRate,
       }));
 
-    handleChange({
-      ...formData,
-      invoiceLines,
-    });
+    // Only update if the invoice lines actually changed
+    const currentLines = formData.invoiceLines || [];
+    const hasChanged = JSON.stringify(currentLines) !== JSON.stringify(invoiceLines);
+    
+    if (hasChanged) {
+      onChange({
+        ...formData,
+        invoiceLines,
+      });
+    }
   }, [lines]);
+
+  // Initialize lines from formData.invoiceLines
+  useEffect(() => {
+    if (formData.invoiceLines && formData.invoiceLines.length > 0) {
+      const initialLines = formData.invoiceLines.map((line) => ({
+        description: line.description,
+        quantity: line.quantity,
+        unitPrice: line.unitPrice,
+        taxRate: line.taxRate,
+      }));
+      setLines(initialLines);
+    }
+  }, []);
 
   const handleCompanySelect = (companyId: string) => {
     const company = companies.find((c) => c.id === companyId);
     if (company) {
       setSelectedCompany(company);
-      handleChange({
+      onChange({
         ...formData,
         companyName: company.name,
         companyAddressLine1: company.addressLine1,
@@ -165,7 +189,7 @@ export default function InvoiceForm({
     const customer = customers.find((c) => c.id === customerId);
     if (customer) {
       setSelectedCustomer(customer);
-      handleChange({
+      onChange({
         ...formData,
         customerName: customer.name,
         customerAddressLine1: customer.addressLine1,
@@ -233,7 +257,9 @@ export default function InvoiceForm({
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">New Invoice</h1>
+        <h1 className="text-3xl font-bold">
+          {isEditing ? "Edit Invoice" : "New Invoice"}
+        </h1>
         <button
           onClick={onCancel}
           className="text-gray-600 hover:text-gray-800"
@@ -242,13 +268,7 @@ export default function InvoiceForm({
         </button>
       </div>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={onSubmit} className="space-y-6">
         <div className="bg-white shadow rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Invoice Details</h2>
 
@@ -262,7 +282,7 @@ export default function InvoiceForm({
                 required
                 value={formData.issueDate}
                 onChange={(e) =>
-                  handleChange({ ...formData, issueDate: e.target.value })
+                  onChange({ ...formData, issueDate: e.target.value })
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -286,7 +306,7 @@ export default function InvoiceForm({
                 required
                 value={formData.dueDate}
                 onChange={(e) =>
-                  handleChange({ ...formData, dueDate: e.target.value })
+                  onChange({ ...formData, dueDate: e.target.value })
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -309,7 +329,7 @@ export default function InvoiceForm({
                 required
                 value={formData.currency}
                 onChange={(e) =>
-                  handleChange({ ...formData, currency: e.target.value })
+                  onChange({ ...formData, currency: e.target.value })
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
@@ -510,10 +530,9 @@ export default function InvoiceForm({
           </button>
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
           >
-            {isSubmitting ? "Creating..." : "Create Invoice"}
+            {isEditing ? "Update Invoice" : "Create Invoice"}
           </button>
         </div>
       </form>

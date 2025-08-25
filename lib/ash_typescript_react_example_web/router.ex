@@ -60,10 +60,13 @@ defmodule AshTypescriptReactExampleWeb.Router do
     get "/customers", InvoicingController, :customers
     get "/customers/new", InvoicingController, :new_customer
     get "/invoices", InvoicingController, :invoices
+    get "/invoices-offset", InvoicingController, :invoices_offset
     get "/invoices/new", InvoicingController, :new_invoice
+    get "/invoices/:id", InvoicingController, :view_invoice
     get "/invoices/:id/edit", InvoicingController, :edit_invoice
     get "/credit-notes", InvoicingController, :credit_notes
     get "/credit-notes/new", InvoicingController, :new_credit_note
+    get "/credit-notes/:id", InvoicingController, :view_credit_note
     get "/credit-notes/:id/edit", InvoicingController, :edit_credit_note
   end
 

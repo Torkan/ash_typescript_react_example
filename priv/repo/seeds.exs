@@ -10,8 +10,6 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-import Ecto.Query
-
 # Helper function to create a user with magic link without sending email
 defmodule SeedHelpers do
   def create_or_get_user(email) do
@@ -370,7 +368,7 @@ IO.puts("✅ Created and finalized invoice: #{finalized_invoice.serial_number}")
 
 IO.puts("✅ Created and finalized credit note: #{credit_note.serial_number}")
 
-# Create simple invoice for individual consultant  
+# Create simple invoice for individual consultant
 {:ok, simple_invoice} =
   AshTypescriptReactExample.Invoicing.Invoice
   |> Ash.Changeset.for_create(
@@ -419,13 +417,128 @@ IO.puts("✅ Created and finalized credit note: #{credit_note.serial_number}")
 
 IO.puts("✅ Created simple invoice for individual consultant")
 
+# Create additional invoices for pagination testing
+IO.puts("🔢 Creating additional invoices for pagination testing...")
+
+# Sample services for variety
+services = [
+  {"Web Development - Frontend", Decimal.new("1250.00"), 20..50},
+  {"Backend API Development", Decimal.new("1400.00"), 15..40},
+  {"Database Design", Decimal.new("1600.00"), 8..24},
+  {"UI/UX Design", Decimal.new("1100.00"), 25..60},
+  {"Technical Consulting", Decimal.new("1800.00"), 10..30},
+  {"Code Review & Optimization", Decimal.new("1300.00"), 12..35},
+  {"DevOps & Infrastructure", Decimal.new("1700.00"), 8..25},
+  {"Mobile App Development", Decimal.new("1350.00"), 30..80},
+  {"System Architecture", Decimal.new("1900.00"), 5..20},
+  {"Quality Assurance", Decimal.new("1000.00"), 20..50}
+]
+
+companies = [default_company, second_company]
+customers = [customer1, customer2, customer3]
+
+# Create 47 additional invoices (we already have 3)
+additional_invoices =
+  for i <- 1..47 do
+    # Vary the dates over the past 6 months
+    days_ago = :rand.uniform(180)
+    issue_date = Date.add(Date.utc_today(), -days_ago)
+    due_date = Date.add(issue_date, :rand.uniform(45) + 15)
+
+    # Randomly select company and customer
+    company = Enum.random(companies)
+    customer = Enum.random(customers)
+
+    # Create invoice
+    {:ok, invoice} =
+      AshTypescriptReactExample.Invoicing.Invoice
+      |> Ash.Changeset.for_create(
+        :create,
+        %{
+          issue_date: issue_date,
+          due_date: due_date,
+          company_name: company.name,
+          company_address_line_1: company.address_line_1,
+          company_address_line_2: company.address_line_2,
+          company_city: company.city,
+          company_postal_code: company.postal_code,
+          company_country: company.country,
+          company_vat_number: company.vat_number,
+          company_email: company.email,
+          company_phone: company.phone,
+          customer_name: customer.name,
+          customer_address_line_1: customer.address_line_1,
+          customer_address_line_2: customer.address_line_2,
+          customer_city: customer.city,
+          customer_postal_code: customer.postal_code,
+          customer_country: customer.country,
+          customer_vat_number: customer.vat_number,
+          customer_email: customer.email,
+          customer_phone: customer.phone,
+          currency: "NOK"
+        },
+        tenant: user.id,
+        actor: user
+      )
+      |> Ash.create()
+
+    # Add 1-3 lines per invoice
+    num_lines = :rand.uniform(3)
+
+    for line_num <- 1..num_lines do
+      {service_name, base_price, hour_range} = Enum.random(services)
+
+      hours =
+        Decimal.new(
+          to_string(
+            :rand.uniform(Enum.max(hour_range) - Enum.min(hour_range)) + Enum.min(hour_range)
+          )
+        )
+
+      # Slight price variation (±10%)
+      price_variation = 1.0 + (:rand.uniform() - 0.5) * 0.2
+      unit_price = Decimal.mult(base_price, Decimal.from_float(price_variation))
+
+      {:ok, _line} =
+        AshTypescriptReactExample.Invoicing.InvoiceLine
+        |> Ash.Changeset.for_create(
+          :create,
+          %{
+            invoice_id: invoice.id,
+            line_number: line_num,
+            description: "#{service_name} - Invoice ##{i}",
+            quantity: hours,
+            unit_price: unit_price,
+            tax_rate: Decimal.new("25.0")
+          },
+          actor: user
+        )
+        |> Ash.create()
+    end
+
+    # Randomly finalize some invoices (about 60%)
+    if :rand.uniform() < 0.6 do
+      {:ok, finalized_invoice} =
+        invoice
+        |> Ash.Changeset.for_update(:finalize, %{}, tenant: user.id, actor: user)
+        |> Ash.update()
+
+      finalized_invoice
+    else
+      invoice
+    end
+  end
+
+IO.puts("✅ Created #{length(additional_invoices)} additional invoices")
+
 IO.puts("\n🎉 Seed data creation completed successfully!")
 IO.puts("📊 Summary:")
 IO.puts("  • 1 test user (#{user.email})")
 IO.puts("  • 2 companies (1 default, 1 secondary)")
 IO.puts("  • 3 customers")
-IO.puts("  • 3 invoices (1 draft, 1 finalized, 1 simple)")
+IO.puts("  • 50 invoices (mix of draft and finalized)")
 IO.puts("  • 1 finalized credit note")
-IO.puts("  • Multiple invoice/credit note lines")
+IO.puts("  • Multiple invoice/credit note lines with varied services")
 IO.puts("\n💡 You can now test the system with realistic data!")
-IO.puts("🔍 Access with: user_id = \"#{user.id}\"")
+IO.puts("🔍 Login with: #{user.email}")
+IO.puts("📄 Perfect for testing pagination with ~50 invoices!")

@@ -10,15 +10,13 @@ defmodule AshTypescriptReactExampleWeb.Plugs.Locale do
   import Plug.Conn
   import Inertia.Controller
 
-  @default_locale "no"
+  @default_locale "en"
   @supported_locales ["en", "no"]
 
   def init(opts), do: opts
 
   def call(conn, _opts) do
     locale = get_session_locale(conn)
-
-    IO.inspect(locale, label: "LOCALE IS")
 
     conn
     |> assign(:locale, locale)

@@ -1,6 +1,7 @@
 defmodule AshTypescriptReactExampleWeb.Plugs.RequireUser do
   import Plug.Conn
   import Phoenix.Controller
+  import Inertia.Controller
   use AshTypescriptReactExampleWeb, :verified_routes
 
   def init(default), do: default
@@ -17,6 +18,7 @@ defmodule AshTypescriptReactExampleWeb.Plugs.RequireUser do
 
       _ ->
         Ash.PlugHelpers.set_actor(conn, current_user)
+        |> assign_prop(:currentUserId, current_user.id)
     end
   end
 end

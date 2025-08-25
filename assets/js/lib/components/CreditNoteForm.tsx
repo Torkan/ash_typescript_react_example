@@ -1,12 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useAshRpcForm } from "../useAshRpcForm";
-import {
-  createCreditNote,
-  createCreditNoteZodschema,
-  validateCreateCreditNote,
-  buildCSRFHeaders,
-  CreateCreditNoteInput,
-} from "../../ash_rpc";
 
 export interface CreditNoteLine {
   description: string;
@@ -51,87 +43,112 @@ export interface InvoiceType {
   issueDate: string;
 }
 
+export interface CreditNoteFormData {
+  issueDate: string;
+  creditReason: string;
+  currency: string;
+  originalInvoiceId?: string | null;
+  companyName: string;
+  companyAddressLine1: string;
+  companyAddressLine2: string;
+  companyCity: string;
+  companyPostalCode: string;
+  companyCountry: string;
+  companyVatNumber: string;
+  companyEmail: string;
+  companyPhone: string;
+  customerName: string;
+  customerAddressLine1: string;
+  customerAddressLine2: string;
+  customerCity: string;
+  customerPostalCode: string;
+  customerCountry: string;
+  customerVatNumber: string;
+  customerEmail: string;
+  customerPhone: string;
+  creditNoteLines: Array<{
+    lineNumber: number;
+    description: string;
+    quantity: string;
+    unitPrice: string;
+    taxRate: string;
+  }>;
+}
+
+export interface CreditNoteFormFieldErrors {
+  issueDate?: string[];
+  creditReason?: string[];
+  currency?: string[];
+  originalInvoiceId?: string[];
+  companyName?: string[];
+  companyAddressLine1?: string[];
+  companyAddressLine2?: string[];
+  companyCity?: string[];
+  companyPostalCode?: string[];
+  companyCountry?: string[];
+  companyVatNumber?: string[];
+  companyEmail?: string[];
+  companyPhone?: string[];
+  customerName?: string[];
+  customerAddressLine1?: string[];
+  customerAddressLine2?: string[];
+  customerCity?: string[];
+  customerPostalCode?: string[];
+  customerCountry?: string[];
+  customerVatNumber?: string[];
+  customerEmail?: string[];
+  customerPhone?: string[];
+  creditNoteLines?: string[];
+}
+
 interface CreditNoteFormProps {
   companies: CompanyType[];
   customers: CustomerType[];
   invoices: InvoiceType[];
-  onSuccess: () => void;
+  formData: CreditNoteFormData;
+  fieldErrors?: CreditNoteFormFieldErrors;
+  onChange: (data: CreditNoteFormData) => void;
+  onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
-  initialData?: Partial<CreateCreditNoteInput>;
+  isEditing: boolean;
 }
 
 export default function CreditNoteForm({
   companies,
   customers,
   invoices,
-  onSuccess,
+  formData,
+  fieldErrors,
+  onChange,
+  onSubmit,
   onCancel,
-  initialData,
+  isEditing,
 }: CreditNoteFormProps) {
-  const [selectedCompany, setSelectedCompany] = useState<CompanyType | null>(null);
-  const [selectedCustomer, setSelectedCustomer] = useState<CustomerType | null>(null);
-  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceType | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<CompanyType | null>(
+    null,
+  );
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerType | null>(
+    null,
+  );
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceType | null>(
+    null,
+  );
   const [lines, setLines] = useState<CreditNoteLine[]>([
     { description: "", quantity: "1", unitPrice: "", taxRate: "25" }
   ]);
 
-  const { formData, fieldErrors, handleChange, handleSubmit, isSubmitting, error } =
-    useAshRpcForm<CreateCreditNoteInput, CreateCreditNoteInput>({
-      initialData: {
-        issueDate: new Date().toISOString().split('T')[0],
-        creditReason: "",
-        currency: "NOK",
-        originalInvoiceId: null,
-        companyName: "",
-        companyAddressLine1: "",
-        companyAddressLine2: "",
-        companyCity: "",
-        companyPostalCode: "",
-        companyCountry: "",
-        companyVatNumber: "",
-        companyEmail: "",
-        companyPhone: "",
-        customerName: "",
-        customerAddressLine1: "",
-        customerAddressLine2: "",
-        customerCity: "",
-        customerPostalCode: "",
-        customerCountry: "",
-        customerVatNumber: "",
-        customerEmail: "",
-        customerPhone: "",
-        creditNoteLines: [],
-        ...initialData,
-      },
-      zodSchema: createCreditNoteZodschema,
-      serverValidation: async (data) => {
-        return validateCreateCreditNote({
-          input: data,
-          headers: buildCSRFHeaders(),
-        });
-      },
-      onSubmit: async (data) => {
-        return createCreditNote({
-          input: data,
-          fields: ["id"],
-          headers: buildCSRFHeaders(),
-        });
-      },
-      onSuccess,
-    });
-
   // Auto-select default company on mount
   useEffect(() => {
-    const defaultCompany = companies.find(c => c.isDefault);
+    const defaultCompany = companies.find((c) => c.isDefault);
     if (defaultCompany && !selectedCompany) {
       handleCompanySelect(defaultCompany.id);
     }
-  }, [companies]);
+  }, [companies, selectedCompany]);
 
-  // Sync lines with form data
+  // Sync lines with form data when lines change
   useEffect(() => {
     const creditNoteLines = lines
-      .filter(line => line.description && line.unitPrice)
+      .filter((line) => line.description && line.unitPrice)
       .map((line, index) => ({
         lineNumber: index + 1,
         description: line.description,
@@ -140,17 +157,36 @@ export default function CreditNoteForm({
         taxRate: line.taxRate,
       }));
 
-    handleChange({
-      ...formData,
-      creditNoteLines,
-    });
+    // Only update if the credit note lines actually changed
+    const currentLines = formData.creditNoteLines || [];
+    const hasChanged = JSON.stringify(currentLines) !== JSON.stringify(creditNoteLines);
+    
+    if (hasChanged) {
+      onChange({
+        ...formData,
+        creditNoteLines,
+      });
+    }
   }, [lines]);
 
+  // Initialize lines from formData.creditNoteLines
+  useEffect(() => {
+    if (formData.creditNoteLines && formData.creditNoteLines.length > 0) {
+      const initialLines = formData.creditNoteLines.map((line) => ({
+        description: line.description,
+        quantity: line.quantity,
+        unitPrice: line.unitPrice,
+        taxRate: line.taxRate,
+      }));
+      setLines(initialLines);
+    }
+  }, []);
+
   const handleCompanySelect = (companyId: string) => {
-    const company = companies.find(c => c.id === companyId);
+    const company = companies.find((c) => c.id === companyId);
     if (company) {
       setSelectedCompany(company);
-      handleChange({
+      onChange({
         ...formData,
         companyName: company.name,
         companyAddressLine1: company.addressLine1,
@@ -166,10 +202,10 @@ export default function CreditNoteForm({
   };
 
   const handleCustomerSelect = (customerId: string) => {
-    const customer = customers.find(c => c.id === customerId);
+    const customer = customers.find((c) => c.id === customerId);
     if (customer) {
       setSelectedCustomer(customer);
-      handleChange({
+      onChange({
         ...formData,
         customerName: customer.name,
         customerAddressLine1: customer.addressLine1,
@@ -185,19 +221,23 @@ export default function CreditNoteForm({
   };
 
   const handleInvoiceSelect = (invoiceId: string) => {
-    const invoice = invoices.find(i => i.id === invoiceId);
+    const invoice = invoices.find((i) => i.id === invoiceId);
     if (invoice) {
       setSelectedInvoice(invoice);
       // Auto-select matching customer and company
-      const matchingCustomer = customers.find(c => c.name === invoice.customerName);
-      const matchingCompany = companies.find(c => c.name === invoice.companyName);
+      const matchingCustomer = customers.find((c) => c.name === invoice.customerName);
+      const matchingCompany = companies.find((c) => c.name === invoice.companyName);
+      
+      let updatedFormData = {
+        ...formData,
+        originalInvoiceId: invoice.id,
+        currency: invoice.currency,
+      };
       
       if (matchingCustomer) {
         setSelectedCustomer(matchingCustomer);
-        handleChange({
-          ...formData,
-          originalInvoiceId: invoice.id,
-          currency: invoice.currency,
+        updatedFormData = {
+          ...updatedFormData,
           customerName: matchingCustomer.name,
           customerAddressLine1: matchingCustomer.addressLine1,
           customerAddressLine2: matchingCustomer.addressLine2 || "",
@@ -207,14 +247,12 @@ export default function CreditNoteForm({
           customerVatNumber: matchingCustomer.vatNumber || "",
           customerEmail: matchingCustomer.email || "",
           customerPhone: matchingCustomer.phone || "",
-        });
+        };
       }
       if (matchingCompany) {
         setSelectedCompany(matchingCompany);
-        handleChange({
-          ...formData,
-          originalInvoiceId: invoice.id,
-          currency: invoice.currency,
+        updatedFormData = {
+          ...updatedFormData,
           companyName: matchingCompany.name,
           companyAddressLine1: matchingCompany.addressLine1,
           companyAddressLine2: matchingCompany.addressLine2 || "",
@@ -224,11 +262,13 @@ export default function CreditNoteForm({
           companyVatNumber: matchingCompany.vatNumber || "",
           companyEmail: matchingCompany.email || "",
           companyPhone: matchingCompany.phone || "",
-        });
+        };
       }
+      
+      onChange(updatedFormData);
     } else {
       setSelectedInvoice(null);
-      handleChange({
+      onChange({
         ...formData,
         originalInvoiceId: null,
       });
@@ -236,7 +276,10 @@ export default function CreditNoteForm({
   };
 
   const addLine = () => {
-    setLines([...lines, { description: "", quantity: "1", unitPrice: "", taxRate: "25" }]);
+    setLines([
+      ...lines,
+      { description: "", quantity: "1", unitPrice: "", taxRate: "25" },
+    ]);
   };
 
   const removeLine = (index: number) => {
@@ -245,7 +288,11 @@ export default function CreditNoteForm({
     }
   };
 
-  const updateLine = (index: number, field: keyof CreditNoteLine, value: string) => {
+  const updateLine = (
+    index: number,
+    field: keyof CreditNoteLine,
+    value: string,
+  ) => {
     const newLines = [...lines];
     newLines[index] = { ...newLines[index], [field]: value };
     setLines(newLines);
@@ -255,7 +302,7 @@ export default function CreditNoteForm({
     let subtotal = 0;
     let tax = 0;
     
-    lines.forEach(line => {
+    lines.forEach((line) => {
       const quantity = parseFloat(line.quantity) || 0;
       const unitPrice = parseFloat(line.unitPrice) || 0;
       const taxRate = parseFloat(line.taxRate) || 0;
@@ -272,7 +319,9 @@ export default function CreditNoteForm({
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">New Credit Note</h1>
+        <h1 className="text-3xl font-bold">
+          {isEditing ? "Edit Credit Note" : "New Credit Note"}
+        </h1>
         <button
           onClick={onCancel}
           className="text-gray-600 hover:text-gray-800"
@@ -281,13 +330,7 @@ export default function CreditNoteForm({
         </button>
       </div>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={onSubmit} className="space-y-6">
         <div className="bg-white shadow rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Credit Note Details</h2>
           
@@ -300,7 +343,7 @@ export default function CreditNoteForm({
                 type="date"
                 required
                 value={formData.issueDate}
-                onChange={(e) => handleChange({ ...formData, issueDate: e.target.value })}
+                onChange={(e) => onChange({ ...formData, issueDate: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {fieldErrors?.issueDate && fieldErrors.issueDate.length > 0 && (
@@ -321,7 +364,7 @@ export default function CreditNoteForm({
               <select
                 required
                 value={formData.currency}
-                onChange={(e) => handleChange({ ...formData, currency: e.target.value })}
+                onChange={(e) => onChange({ ...formData, currency: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="NOK">NOK</option>
@@ -359,7 +402,7 @@ export default function CreditNoteForm({
               required
               rows={3}
               value={formData.creditReason}
-              onChange={(e) => handleChange({ ...formData, creditReason: e.target.value })}
+              onChange={(e) => onChange({ ...formData, creditReason: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Please describe the reason for this credit note..."
             />
@@ -464,7 +507,9 @@ export default function CreditNoteForm({
                       <input
                         type="text"
                         value={line.description}
-                        onChange={(e) => updateLine(index, 'description', e.target.value)}
+                        onChange={(e) =>
+                          updateLine(index, "description", e.target.value)
+                        }
                         className="w-full px-2 py-1 border border-gray-300 rounded"
                         placeholder="Description"
                       />
@@ -474,7 +519,9 @@ export default function CreditNoteForm({
                         type="number"
                         step="0.01"
                         value={line.quantity}
-                        onChange={(e) => updateLine(index, 'quantity', e.target.value)}
+                        onChange={(e) =>
+                          updateLine(index, "quantity", e.target.value)
+                        }
                         className="w-full px-2 py-1 border border-gray-300 rounded"
                       />
                     </td>
@@ -483,7 +530,9 @@ export default function CreditNoteForm({
                         type="number"
                         step="0.01"
                         value={line.unitPrice}
-                        onChange={(e) => updateLine(index, 'unitPrice', e.target.value)}
+                        onChange={(e) =>
+                          updateLine(index, "unitPrice", e.target.value)
+                        }
                         className="w-full px-2 py-1 border border-gray-300 rounded"
                         placeholder="0.00"
                       />
@@ -493,7 +542,9 @@ export default function CreditNoteForm({
                         type="number"
                         step="0.01"
                         value={line.taxRate}
-                        onChange={(e) => updateLine(index, 'taxRate', e.target.value)}
+                        onChange={(e) =>
+                          updateLine(index, "taxRate", e.target.value)
+                        }
                         className="w-full px-2 py-1 border border-gray-300 rounded"
                       />
                     </td>
@@ -536,10 +587,9 @@ export default function CreditNoteForm({
           </button>
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
           >
-            {isSubmitting ? "Creating..." : "Create Credit Note"}
+            {isEditing ? "Update Credit Note" : "Create Credit Note"}
           </button>
         </div>
       </form>

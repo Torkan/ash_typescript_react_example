@@ -31,7 +31,7 @@ defmodule AshTypescriptReactExample.Accounts.User.Senders.SendMagicLinkEmail do
 
   defp body(params) do
     # The link goes to our verify page which will auto-submit the token
-    sign_in_url = url(~p"/sign-in/verify?token=#{params[:token]}")
+    sign_in_url = "http://localhost:5173/sign-in/verify?token=#{params[:token]}"
 
     """
     <p>Hello, #{params[:email]}!</p>

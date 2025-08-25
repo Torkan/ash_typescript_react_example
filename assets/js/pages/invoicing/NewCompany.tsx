@@ -7,6 +7,8 @@ import {
   validateCreateCompany,
   buildCSRFHeaders,
   CreateCompanyInput,
+  CompaniesListView,
+  CustomersListView,
 } from "../../ash_rpc";
 import CompanyForm, { CompanyFormData } from "$lib/components/CompanyForm";
 import { useAshRpcForm } from "$lib/useAshRpcForm";
@@ -16,6 +18,8 @@ interface NewCompanyPageProps {
   current_user_id: string;
   locale: string;
   page_title: string;
+  companies: CompaniesListView;
+  customers: CustomersListView;
 }
 
 export default function NewCompany({ locale }: NewCompanyPageProps) {

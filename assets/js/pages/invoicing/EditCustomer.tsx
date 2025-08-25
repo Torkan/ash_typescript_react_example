@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "@inertiajs/react";
 import { useAshRpcForm } from "../../lib/useAshRpcForm";
 import {
   getCustomer,
@@ -337,12 +338,12 @@ export default function EditCustomer({
               >
                 {isSubmitting ? "Updating..." : "Update Customer"}
               </button>
-              <a
+              <Link
                 href="/customers"
                 className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded inline-block text-center"
               >
                 Cancel
-              </a>
+              </Link>
             </div>
           </form>
         </div>
