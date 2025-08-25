@@ -58,6 +58,7 @@ defmodule AshTypescriptReactExampleWeb.Router do
     get "/companies/new", InvoicingController, :new_company
     get "/companies/:id", InvoicingController, :edit_company
     get "/customers", InvoicingController, :customers
+    get "/customers/new", InvoicingController, :new_customer
     get "/invoices", InvoicingController, :invoices
     get "/invoices/new", InvoicingController, :new_invoice
     get "/invoices/:id/edit", InvoicingController, :edit_invoice

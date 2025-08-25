@@ -7,6 +7,7 @@ import {
   ListActiveCustomersResult,
   ListActiveCustomersFields,
 } from "../../ash_rpc";
+import InvoicingLayout from "../../lib/components/InvoicingLayout";
 
 interface CustomersPageProps {
   current_user_id: string;
@@ -36,7 +37,7 @@ async function fetchCustomers() {
   });
 }
 
-export default function Customers({}: CustomersPageProps) {
+export default function Customers({ locale }: CustomersPageProps) {
   const [customers, setCustomers] = useState<
     Extract<ListActiveCustomersResult<typeof customerFields>, { success: true }>["data"]
   >([]);
@@ -110,18 +111,21 @@ export default function Customers({}: CustomersPageProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading customers...</div>
-      </div>
+      <InvoicingLayout locale={locale}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-lg">Loading customers...</div>
+        </div>
+      </InvoicingLayout>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <InvoicingLayout locale={locale}>
+      <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Customers</h1>
         <a
-          href="/invoicing/customers/create"
+          href="/customers/new"
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
         >
           Add Customer
@@ -163,7 +167,7 @@ export default function Customers({}: CustomersPageProps) {
             </div>
             <div className="mt-4 flex gap-2">
               <a
-                href={`/invoicing/customers/${customer.id}/edit`}
+                href={`/customers/${customer.id}/edit`}
                 className="text-blue-600 hover:text-blue-800 text-sm font-medium"
               >
                 Edit
@@ -189,6 +193,7 @@ export default function Customers({}: CustomersPageProps) {
           customer.
         </div>
       )}
-    </div>
+      </div>
+    </InvoicingLayout>
   );
 }

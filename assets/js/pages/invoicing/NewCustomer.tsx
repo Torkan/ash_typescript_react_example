@@ -5,8 +5,9 @@ import {
   createCustomerZodschema,
   buildCSRFHeaders,
 } from "../../ash_rpc";
+import InvoicingLayout from "../../lib/components/InvoicingLayout";
 
-interface CreateCustomerPageProps {
+interface NewCustomerPageProps {
   current_user_id: string;
   locale: string;
   page_title: string;
@@ -24,7 +25,7 @@ const defaultCustomerData = {
   phone: "",
 };
 
-export default function CreateCustomer({}: CreateCustomerPageProps) {
+export default function NewCustomer({ locale }: NewCustomerPageProps) {
   const {
     formData,
     fieldErrors,
@@ -44,7 +45,7 @@ export default function CreateCustomer({}: CreateCustomerPageProps) {
       return result;
     },
     onSuccess: (_result) => {
-      window.location.href = "/invoicing/customers";
+      window.location.href = "/customers";
     },
   });
 
@@ -58,11 +59,12 @@ export default function CreateCustomer({}: CreateCustomerPageProps) {
     };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <InvoicingLayout locale={locale}>
+      <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Create Customer</h1>
         <a
-          href="/invoicing/customers"
+          href="/customers"
           className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
         >
           Back to Customers
@@ -247,7 +249,7 @@ export default function CreateCustomer({}: CreateCustomerPageProps) {
               {isSubmitting ? "Creating..." : "Create Customer"}
             </button>
             <a
-              href="/invoicing/customers"
+              href="/customers"
               className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded inline-block text-center"
             >
               Cancel
@@ -255,6 +257,7 @@ export default function CreateCustomer({}: CreateCustomerPageProps) {
           </div>
         </form>
       </div>
-    </div>
+      </div>
+    </InvoicingLayout>
   );
 }

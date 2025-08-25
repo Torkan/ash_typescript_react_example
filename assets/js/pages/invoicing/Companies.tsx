@@ -7,6 +7,7 @@ import {
   ListCompaniesResult,
   ListCompaniesFields,
 } from "../../ash_rpc";
+import InvoicingLayout from "../../lib/components/InvoicingLayout";
 
 interface CompaniesPageProps {
   current_user_id: string;
@@ -36,7 +37,7 @@ async function fetchCompanies() {
   });
 }
 
-export default function Companies({}: CompaniesPageProps) {
+export default function Companies({ locale }: CompaniesPageProps) {
   const [companies, setCompanies] = useState<
     Extract<ListCompaniesResult<typeof companyFields>, { success: true }>["data"]
   >([]);
@@ -86,14 +87,17 @@ export default function Companies({}: CompaniesPageProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading companies...</div>
-      </div>
+      <InvoicingLayout locale={locale}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-lg">Loading companies...</div>
+        </div>
+      </InvoicingLayout>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <InvoicingLayout locale={locale}>
+      <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Companies</h1>
         <Link
@@ -155,6 +159,7 @@ export default function Companies({}: CompaniesPageProps) {
           No companies found. Click "Add Company" to create your first company.
         </div>
       )}
-    </div>
+      </div>
+    </InvoicingLayout>
   );
 }

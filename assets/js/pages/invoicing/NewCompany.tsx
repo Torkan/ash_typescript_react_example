@@ -10,6 +10,7 @@ import {
 } from "../../ash_rpc";
 import CompanyForm, { CompanyFormData } from "$lib/components/CompanyForm";
 import { useAshRpcForm } from "$lib/useAshRpcForm";
+import InvoicingLayout from "../../lib/components/InvoicingLayout";
 
 interface NewCompanyPageProps {
   current_user_id: string;
@@ -17,7 +18,7 @@ interface NewCompanyPageProps {
   page_title: string;
 }
 
-export default function NewCompany({}: NewCompanyPageProps) {
+export default function NewCompany({ locale }: NewCompanyPageProps) {
   const { formData, fieldErrors, handleChange, handleSubmit, error } =
     useAshRpcForm<CompanyFormData, CreateCompanyInput>({
       initialData: {
@@ -56,32 +57,34 @@ export default function NewCompany({}: NewCompanyPageProps) {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <Link
-            href="/companies"
-            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-          >
-            ← Back to Companies
-          </Link>
-        </div>
-
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
+    <InvoicingLayout locale={locale}>
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-6">
+            <Link
+              href="/companies"
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            >
+              ← Back to Companies
+            </Link>
           </div>
-        )}
 
-        <CompanyForm
-          formData={formData}
-          fieldErrors={fieldErrors}
-          onChange={handleChange}
-          onSubmit={handleSubmit}
-          onCancel={handleCancel}
-          isEditing={false}
-        />
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              {error}
+            </div>
+          )}
+
+          <CompanyForm
+            formData={formData}
+            fieldErrors={fieldErrors}
+            onChange={handleChange}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+            isEditing={false}
+          />
+        </div>
       </div>
-    </div>
+    </InvoicingLayout>
   );
 }

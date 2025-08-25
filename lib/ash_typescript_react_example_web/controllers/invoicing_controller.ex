@@ -36,6 +36,14 @@ defmodule AshTypescriptReactExampleWeb.InvoicingController do
     |> render_inertia("invoicing/Customers")
   end
 
+  def new_customer(conn, _params) do
+    conn
+    |> assign_prop(:current_user_id, conn.assigns.current_user.id)
+    |> assign_prop(:locale, conn.assigns[:locale] || "en")
+    |> assign_prop(:page_title, "New Customer")
+    |> render_inertia("invoicing/NewCustomer")
+  end
+
   def invoices(conn, _params) do
     conn
     |> assign_prop(:current_user_id, conn.assigns.current_user.id)

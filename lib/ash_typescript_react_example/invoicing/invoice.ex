@@ -81,12 +81,17 @@ defmodule AshTypescriptReactExample.Invoicing.Invoice do
         :customer_phone
       ]
 
+      argument :invoice_lines, {:array, :map}, default: []
+
       change relate_actor(:user)
       change set_attribute(:user_id, actor(:id))
+      
+      change manage_relationship(:invoice_lines, type: :direct_control)
     end
 
     update :update do
       primary? true
+      require_atomic? false
       # State validation ensures only draft invoices can be updated
 
       accept [
@@ -112,6 +117,10 @@ defmodule AshTypescriptReactExample.Invoicing.Invoice do
         :customer_email,
         :customer_phone
       ]
+
+      argument :invoice_lines, {:array, :map}, default: []
+      
+      change manage_relationship(:invoice_lines, type: :direct_control)
     end
 
     read :list do

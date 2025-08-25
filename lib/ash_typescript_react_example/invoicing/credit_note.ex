@@ -82,8 +82,12 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
         :customer_phone
       ]
 
+      argument :credit_note_lines, {:array, :map}, default: []
+
       change relate_actor(:user)
       change set_attribute(:user_id, actor(:id))
+
+      change manage_relationship(:credit_note_lines, type: :direct_control)
     end
 
     create :create_from_invoice do
@@ -101,6 +105,7 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
 
     update :update do
       primary? true
+      require_atomic? false
       # State validation ensures only draft credit notes can be updated
 
       accept [
@@ -127,6 +132,10 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
         :customer_email,
         :customer_phone
       ]
+
+      argument :credit_note_lines, {:array, :map}, default: []
+
+      change manage_relationship(:credit_note_lines, type: :direct_control)
     end
 
     read :list do
@@ -212,11 +221,6 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
   end
 
   policies do
-    # Only allow users to access their own credit notes
-    bypass AshAuthentication.Checks.AshAuthenticationInteraction do
-      authorize_if always()
-    end
-
     policy action_type(:read) do
       authorize_if actor_present()
     end
@@ -227,17 +231,12 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
   end
 
   validations do
-    # Only draft credit notes can be updated (finalize and cancel have their own logic)
     validate attribute_in(:state, [:draft]),
       message: "can only update draft credit notes",
       on: [:update]
 
-    # Credit reason cannot be empty
     validate string_length(:credit_reason, min: 1),
       message: "cannot be empty"
-
-    # Serial number validations will be enforced through state machine transitions
-    # and business logic rather than complex conditional validations
   end
 
   # Multi-tenant by user_id
@@ -272,7 +271,6 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
 
     attribute :credit_reason, :string, allow_nil?: false, public?: true
 
-    # Company details (captured at creation time for immutability)
     attribute :company_name, :string, allow_nil?: false, public?: true
     attribute :company_address_line_1, :string, allow_nil?: false, public?: true
     attribute :company_address_line_2, :string, allow_nil?: true, public?: true
@@ -283,7 +281,6 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
     attribute :company_email, :string, allow_nil?: true, public?: true
     attribute :company_phone, :string, allow_nil?: true, public?: true
 
-    # Customer details (captured at creation time for immutability)
     attribute :customer_name, :string, allow_nil?: false, public?: true
     attribute :customer_address_line_1, :string, allow_nil?: false, public?: true
     attribute :customer_address_line_2, :string, allow_nil?: true, public?: true
@@ -318,20 +315,15 @@ defmodule AshTypescriptReactExample.Invoicing.CreditNote do
     has_many :credit_note_lines, AshTypescriptReactExample.Invoicing.CreditNoteLine
   end
 
-  # Financial totals using Ash calculations
   calculations do
-    # Total amount: subtotal + tax
     calculate :total_amount, :decimal, expr(subtotal_amount + tax_amount)
   end
 
-  # Aggregates for financial calculations  
   aggregates do
-    # Calculate sum of line_total from credit_note_lines
     sum :subtotal_amount, :credit_note_lines, :line_total do
       default Decimal.new(0)
     end
 
-    # Calculate sum of tax_amount from credit_note_lines
     sum :tax_amount, :credit_note_lines, :tax_amount do
       default Decimal.new(0)
     end

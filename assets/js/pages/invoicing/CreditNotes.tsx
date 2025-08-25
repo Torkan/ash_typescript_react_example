@@ -5,8 +5,10 @@ import {
   finalizeCreditNote,
   cancelCreditNote,
   buildCSRFHeaders,
-  type CreditNoteResourceSchema 
+  ListCreditNotesResult,
+  ListCreditNotesFields,
 } from "../../ash_rpc";
+import InvoicingLayout from "../../lib/components/InvoicingLayout";
 
 interface CreditNotesPageProps {
   current_user_id: string;
@@ -14,8 +16,23 @@ interface CreditNotesPageProps {
   page_title: string;
 }
 
-export default function CreditNotes({}: CreditNotesPageProps) {
-  const [creditNotes, setCreditNotes] = useState<CreditNoteResourceSchema[]>([]);
+const creditNoteFields = [
+  'id', 'serialNumber', 'state', 'issueDate', 'creditReason',
+  'customerName', 'companyName', 'currency', 'originalInvoiceId'
+] satisfies ListCreditNotesFields;
+
+// Helper function to fetch credit notes with proper typing
+async function fetchCreditNotes() {
+  return await listCreditNotes({
+    fields: creditNoteFields,
+    headers: buildCSRFHeaders(),
+  });
+}
+
+export default function CreditNotes({ locale }: CreditNotesPageProps) {
+  const [creditNotes, setCreditNotes] = useState<
+    Extract<ListCreditNotesResult<typeof creditNoteFields>, { success: true }>["data"]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "draft" | "finalized" | "cancelled">("all");
@@ -27,11 +44,7 @@ export default function CreditNotes({}: CreditNotesPageProps) {
   const loadCreditNotes = async () => {
     try {
       setLoading(true);
-      const result = await listCreditNotes({
-        fields: ['id', 'serialNumber', 'state', 'issueDate', 'creditReason',
-                 'customerName', 'companyName', 'currency', 'originalInvoiceId'],
-        headers: buildCSRFHeaders(),
-      });
+      const result = await fetchCreditNotes();
       if (result.success) {
         setCreditNotes(result.data);
       } else {
@@ -125,14 +138,17 @@ export default function CreditNotes({}: CreditNotesPageProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading credit notes...</div>
-      </div>
+      <InvoicingLayout locale={locale}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-lg">Loading credit notes...</div>
+        </div>
+      </InvoicingLayout>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <InvoicingLayout locale={locale}>
+      <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Credit Notes</h1>
         <a
@@ -281,6 +297,7 @@ export default function CreditNotes({}: CreditNotesPageProps) {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </InvoicingLayout>
   );
 }

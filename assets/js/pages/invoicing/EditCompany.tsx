@@ -13,6 +13,7 @@ import {
 } from "../../ash_rpc";
 import CompanyForm, { CompanyFormData } from "$lib/components/CompanyForm";
 import { useAshRpcForm } from "$lib/useAshRpcForm";
+import InvoicingLayout from "../../lib/components/InvoicingLayout";
 
 interface EditCompanyPageProps {
   current_user_id: string;
@@ -35,7 +36,7 @@ const companyFields = [
   "isDefault",
 ] satisfies GetCompanyFields;
 
-export default function EditCompany({ company_id }: EditCompanyPageProps) {
+export default function EditCompany({ company_id, locale }: EditCompanyPageProps) {
   const [loading, setLoading] = useState(true);
 
   const {
@@ -147,45 +148,49 @@ export default function EditCompany({ company_id }: EditCompanyPageProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading company...</div>
-      </div>
+      <InvoicingLayout locale={locale}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-lg">Loading company...</div>
+        </div>
+      </InvoicingLayout>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-6 flex justify-between items-center">
-          <Link
-            href="/companies"
-            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-          >
-            ← Back to Companies
-          </Link>
-          <button
-            onClick={handleDelete}
-            className="text-red-600 hover:text-red-800 text-sm font-medium"
-          >
-            Delete Company
-          </button>
-        </div>
-
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
+    <InvoicingLayout locale={locale}>
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-6 flex justify-between items-center">
+            <Link
+              href="/companies"
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            >
+              ← Back to Companies
+            </Link>
+            <button
+              onClick={handleDelete}
+              className="text-red-600 hover:text-red-800 text-sm font-medium"
+            >
+              Delete Company
+            </button>
           </div>
-        )}
 
-        <CompanyForm
-          formData={formData}
-          fieldErrors={fieldErrors}
-          onChange={handleChange}
-          onSubmit={handleSubmit}
-          onCancel={handleCancel}
-          isEditing={true}
-        />
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              {error}
+            </div>
+          )}
+
+          <CompanyForm
+            formData={formData}
+            fieldErrors={fieldErrors}
+            onChange={handleChange}
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+            isEditing={true}
+          />
+        </div>
       </div>
-    </div>
+    </InvoicingLayout>
   );
 }

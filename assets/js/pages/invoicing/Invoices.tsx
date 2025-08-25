@@ -5,8 +5,10 @@ import {
   finalizeInvoice,
   cancelInvoice,
   buildCSRFHeaders,
-  type InvoiceResourceSchema,
+  ListInvoicesResult,
+  ListInvoicesFields,
 } from "../../ash_rpc";
+import InvoicingLayout from "../../lib/components/InvoicingLayout";
 
 interface InvoicesPageProps {
   current_user_id: string;
@@ -14,8 +16,29 @@ interface InvoicesPageProps {
   page_title: string;
 }
 
-export default function Invoices({}: InvoicesPageProps) {
-  const [invoices, setInvoices] = useState<InvoiceResourceSchema[]>([]);
+const invoiceFields = [
+  "id",
+  "serialNumber",
+  "state",
+  "issueDate",
+  "dueDate",
+  "customerName",
+  "companyName",
+  "currency",
+] satisfies ListInvoicesFields;
+
+// Helper function to fetch invoices with proper typing
+async function fetchInvoices() {
+  return await listInvoices({
+    fields: invoiceFields,
+    headers: buildCSRFHeaders(),
+  });
+}
+
+export default function Invoices({ locale }: InvoicesPageProps) {
+  const [invoices, setInvoices] = useState<
+    Extract<ListInvoicesResult<typeof invoiceFields>, { success: true }>["data"]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<
@@ -29,19 +52,7 @@ export default function Invoices({}: InvoicesPageProps) {
   const loadInvoices = async () => {
     try {
       setLoading(true);
-      const result = await listInvoices({
-        fields: [
-          "id",
-          "serialNumber",
-          "state",
-          "issueDate",
-          "dueDate",
-          "customerName",
-          "companyName",
-          "currency",
-        ],
-        headers: buildCSRFHeaders(),
-      });
+      const result = await fetchInvoices();
       if (result.success) {
         setInvoices(result.data);
       } else {
@@ -131,14 +142,17 @@ export default function Invoices({}: InvoicesPageProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading invoices...</div>
-      </div>
+      <InvoicingLayout locale={locale}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-lg">Loading invoices...</div>
+        </div>
+      </InvoicingLayout>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <InvoicingLayout locale={locale}>
+      <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Invoices</h1>
         <a
@@ -289,6 +303,7 @@ export default function Invoices({}: InvoicesPageProps) {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </InvoicingLayout>
   );
 }

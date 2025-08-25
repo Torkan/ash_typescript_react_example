@@ -3,18 +3,21 @@ import {
   listCompanies,
   listActiveCustomers,
   listInvoicesByState,
+  getCreditNote,
   buildCSRFHeaders,
   ListCompaniesFields,
   ListActiveCustomersFields,
   ListInvoicesByStateFields,
+  GetCreditNoteFields,
 } from "../../ash_rpc";
 import CreditNoteForm, { CompanyType, CustomerType, InvoiceType } from "../../lib/components/CreditNoteForm";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
 
-interface NewCreditNotePageProps {
+interface EditCreditNotePageProps {
   current_user_id: string;
   locale: string;
   page_title: string;
+  credit_note_id: string;
 }
 
 const companyFields = [
@@ -31,21 +34,29 @@ const invoiceFields = [
   'id', 'serialNumber', 'customerName', 'companyName', 'currency', 'issueDate'
 ] satisfies ListInvoicesByStateFields;
 
-export default function NewCreditNote({ locale }: NewCreditNotePageProps) {
+const creditNoteFields = [
+  'id', 'state', 'originalInvoiceId', 'issueDate', 
+  'creditReason', 'currency', 'companyName', 'customerName'
+] satisfies GetCreditNoteFields;
+
+export default function EditCreditNote({ locale, credit_note_id }: EditCreditNotePageProps) {
   const [companies, setCompanies] = useState<CompanyType[]>([]);
   const [customers, setCustomers] = useState<CustomerType[]>([]);
   const [invoices, setInvoices] = useState<InvoiceType[]>([]);
+  const [creditNote, setCreditNote] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [credit_note_id]);
 
   const loadData = async () => {
     try {
       setLoading(true);
-      const [companiesResult, customersResult, invoicesResult] = await Promise.all([
+      setError(null);
+
+      const [companiesResult, customersResult, invoicesResult, creditNoteResult] = await Promise.all([
         listCompanies({
           fields: companyFields,
           headers: buildCSRFHeaders(),
@@ -58,9 +69,14 @@ export default function NewCreditNote({ locale }: NewCreditNotePageProps) {
           input: { state: 'finalized' },
           fields: invoiceFields,
           headers: buildCSRFHeaders(),
-        })
+        }),
+        getCreditNote({
+          input: { id: credit_note_id },
+          fields: creditNoteFields,
+          headers: buildCSRFHeaders(),
+        }),
       ]);
-      
+
       if (!companiesResult.success) {
         throw new Error(companiesResult.errors.map(e => e.message).join(', '));
       }
@@ -70,13 +86,16 @@ export default function NewCreditNote({ locale }: NewCreditNotePageProps) {
       if (!invoicesResult.success) {
         throw new Error(invoicesResult.errors.map(e => e.message).join(', '));
       }
-      
+      if (!creditNoteResult.success) {
+        throw new Error(creditNoteResult.errors.map(e => e.message).join(', '));
+      }
+
       setCompanies(companiesResult.data);
       setCustomers(customersResult.data);
       setInvoices(invoicesResult.data);
-      setError(null);
+      setCreditNote(creditNoteResult.data);
     } catch (err) {
-      setError("Failed to load data");
+      setError(err instanceof Error ? err.message : "Failed to load data");
       console.error(err);
     } finally {
       setLoading(false);
@@ -95,7 +114,7 @@ export default function NewCreditNote({ locale }: NewCreditNotePageProps) {
     return (
       <InvoicingLayout locale={locale}>
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-lg">Loading...</div>
+          <div className="text-lg">Loading credit note...</div>
         </div>
       </InvoicingLayout>
     );
@@ -110,10 +129,16 @@ export default function NewCreditNote({ locale }: NewCreditNotePageProps) {
           </div>
           <button
             onClick={loadData}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mr-2"
           >
             Retry
           </button>
+          <a
+            href="/credit-notes"
+            className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded inline-block"
+          >
+            Back to Credit Notes
+          </a>
         </div>
       </InvoicingLayout>
     );
@@ -127,6 +152,7 @@ export default function NewCreditNote({ locale }: NewCreditNotePageProps) {
         invoices={invoices}
         onSuccess={handleSuccess}
         onCancel={handleCancel}
+        initialData={creditNote}
       />
     </InvoicingLayout>
   );
