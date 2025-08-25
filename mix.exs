@@ -99,7 +99,7 @@ defmodule AshTypescriptReactExample.MixProject do
         "run priv/repo/seeds.exs"
       ],
       test: ["ash.setup --quiet", "test"],
-      "assets.build": ["cmd cd assets && bun install"],
+      "assets.build": ["cmd --cd assets bun install"],
       "assets.deploy": [
         "tailwind ash_typescript_react_example --minify",
         "esbuild ash_typescript_react_example --minify",
