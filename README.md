@@ -96,6 +96,8 @@ A comprehensive demonstration of the **ash_typescript** extension for the Ash Fr
 - `assets/js/pages/invoicing/InvoicesOffset.tsx` - Offset pagination
 - `assets/js/pages/invoicing/Companies.tsx` - Client-side loading patterns
 - `assets/js/pages/invoicing/EditInvoice.tsx` - Complex form with useAshRpcForm
+- `lib/ash_typescript_react_example/invoicing.ex` - Ash domain definition with typed queries and RPC actions
+- `lib/ash_typescript_react_example_web/controllers/invoicing_controller.ex` - Phoenix controller using typed queries
 
 ## 🌟 Why ash_typescript?
 
