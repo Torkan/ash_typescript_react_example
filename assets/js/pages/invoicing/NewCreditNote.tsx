@@ -20,6 +20,7 @@ import CreditNoteForm, {
 } from "../../lib/components/CreditNoteForm";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
 import { useAshRpcForm } from "../../lib/useAshRpcForm";
+import { getI18n } from "../../lib/i18n";
 
 interface NewCreditNotePageProps {
   current_user_id: string;
@@ -42,6 +43,7 @@ const invoiceFields = [
 ] satisfies ListInvoicesByStateFields;
 
 export default function NewCreditNote({ locale }: NewCreditNotePageProps) {
+  const { t } = getI18n(locale);
   const [companies, setCompanies] = useState<CompanyType[]>([]);
   const [customers, setCustomers] = useState<CustomerType[]>([]);
   const [invoices, setInvoices] = useState<InvoiceType[]>([]);
@@ -132,7 +134,7 @@ export default function NewCreditNote({ locale }: NewCreditNotePageProps) {
       setInvoices(invoicesResult.data);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load data");
+      setError(err instanceof Error ? err.message : t("invoicing.failedToLoadData"));
       console.error(err);
     } finally {
       setLoading(false);
@@ -147,7 +149,7 @@ export default function NewCreditNote({ locale }: NewCreditNotePageProps) {
     return (
       <InvoicingLayout locale={locale}>
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-lg">Loading...</div>
+          <div className="text-lg">{t("common.loading")}</div>
         </div>
       </InvoicingLayout>
     );
@@ -164,7 +166,7 @@ export default function NewCreditNote({ locale }: NewCreditNotePageProps) {
             onClick={loadData}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
           >
-            Retry
+            {t("invoicing.retry")}
           </button>
         </div>
       </InvoicingLayout>
@@ -183,6 +185,7 @@ export default function NewCreditNote({ locale }: NewCreditNotePageProps) {
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         isEditing={false}
+        locale={locale}
       />
     </InvoicingLayout>
   );

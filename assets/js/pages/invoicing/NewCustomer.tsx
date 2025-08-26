@@ -7,6 +7,7 @@ import {
   buildCSRFHeaders,
 } from "../../ash_rpc";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
+import { getI18n } from "../../lib/i18n";
 
 interface NewCustomerPageProps {
   current_user_id: string;
@@ -14,19 +15,32 @@ interface NewCustomerPageProps {
   page_title: string;
 }
 
-const defaultCustomerData = {
+type CustomerData = {
+  name: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  vatNumber: string;
+  email: string;
+  phone: string;
+};
+
+const getDefaultCustomerData = (t: any): CustomerData => ({
   name: "",
   addressLine1: "",
   addressLine2: "",
   city: "",
   postalCode: "",
-  country: "Norway",
+  country: t("countries.norway"),
   vatNumber: "",
   email: "",
   phone: "",
-};
+});
 
 export default function NewCustomer({ locale }: NewCustomerPageProps) {
+  const { t } = getI18n(locale);
   const {
     formData,
     fieldErrors,
@@ -35,7 +49,7 @@ export default function NewCustomer({ locale }: NewCustomerPageProps) {
     isSubmitting,
     error,
   } = useAshRpcForm({
-    initialData: defaultCustomerData,
+    initialData: getDefaultCustomerData(t),
     zodSchema: createCustomerZodschema,
     onSubmit: async (data) => {
       const result = await createCustomer({
@@ -51,7 +65,7 @@ export default function NewCustomer({ locale }: NewCustomerPageProps) {
   });
 
   const handleInputChange =
-    (field: keyof typeof defaultCustomerData) =>
+    (field: keyof CustomerData) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
       handleChange({
         ...formData,
@@ -63,12 +77,12 @@ export default function NewCustomer({ locale }: NewCustomerPageProps) {
     <InvoicingLayout locale={locale}>
       <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Create Customer</h1>
+        <h1 className="text-3xl font-bold">{t("invoicing.createCustomer")}</h1>
         <Link
           href="/customers"
           className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
         >
-          Back to Customers
+          {t("invoicing.backToCustomers")}
         </Link>
       </div>
 
@@ -85,7 +99,7 @@ export default function NewCustomer({ locale }: NewCustomerPageProps) {
         >
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Customer Name *
+              {t("invoicing.customerName")} *
             </label>
             <input
               type="text"
@@ -103,7 +117,7 @@ export default function NewCustomer({ locale }: NewCustomerPageProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
+              {t("common.email")}
             </label>
             <input
               type="email"
@@ -120,7 +134,7 @@ export default function NewCustomer({ locale }: NewCustomerPageProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Address Line 1 *
+              {t("invoicing.addressLine1")} *
             </label>
             <input
               type="text"
@@ -138,7 +152,7 @@ export default function NewCustomer({ locale }: NewCustomerPageProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Address Line 2
+              {t("invoicing.addressLine2")}
             </label>
             <input
               type="text"
@@ -155,7 +169,7 @@ export default function NewCustomer({ locale }: NewCustomerPageProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              City *
+              {t("forms.city")} *
             </label>
             <input
               type="text"
@@ -173,7 +187,7 @@ export default function NewCustomer({ locale }: NewCustomerPageProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Postal Code *
+              {t("forms.postalCode")} *
             </label>
             <input
               type="text"
@@ -191,7 +205,7 @@ export default function NewCustomer({ locale }: NewCustomerPageProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Country *
+              {t("forms.country")} *
             </label>
             <input
               type="text"
@@ -209,7 +223,7 @@ export default function NewCustomer({ locale }: NewCustomerPageProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              VAT Number
+              {t("invoicing.vatNumber")}
             </label>
             <input
               type="text"
@@ -226,7 +240,7 @@ export default function NewCustomer({ locale }: NewCustomerPageProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone
+              {t("invoicing.phone")}
             </label>
             <input
               type="tel"
@@ -247,13 +261,13 @@ export default function NewCustomer({ locale }: NewCustomerPageProps) {
               disabled={isSubmitting}
               className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white px-4 py-2 rounded"
             >
-              {isSubmitting ? "Creating..." : "Create Customer"}
+              {isSubmitting ? t("invoicing.creating") : t("invoicing.createCustomer")}
             </button>
             <Link
               href="/customers"
               className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded inline-block text-center"
             >
-              Cancel
+              {t("common.cancel")}
             </Link>
           </div>
         </form>

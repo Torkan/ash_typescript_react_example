@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "@inertiajs/react";
 import InvoicingLayout from "../lib/components/InvoicingLayout";
+import { getI18n } from "../lib/i18n";
 
 interface IndexProps {
   current_user_id: string;
@@ -9,13 +10,14 @@ interface IndexProps {
 }
 
 export default function Index({ locale }: IndexProps) {
+  const { t } = getI18n(locale);
   return (
     <InvoicingLayout locale={locale}>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-center mb-8">Invoice Management System</h1>
+          <h1 className="text-4xl font-bold text-center mb-8">{t("invoicing.systemTitle")}</h1>
           <p className="text-lg text-gray-600 text-center mb-8">
-            Manage your companies, customers, invoices, and credit notes efficiently.
+            {t("invoicing.systemDescription")}
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -30,8 +32,8 @@ export default function Index({ locale }: IndexProps) {
                   </div>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Companies</h3>
-                  <p className="text-sm text-gray-600">Manage sender companies</p>
+                  <h3 className="text-lg font-semibold text-gray-900">{t("invoicing.companies")}</h3>
+                  <p className="text-sm text-gray-600">{t("invoicing.manageSenderCompanies")}</p>
                 </div>
               </div>
             </Link>
@@ -47,8 +49,8 @@ export default function Index({ locale }: IndexProps) {
                   </div>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Customers</h3>
-                  <p className="text-sm text-gray-600">Manage your customers</p>
+                  <h3 className="text-lg font-semibold text-gray-900">{t("invoicing.customers")}</h3>
+                  <p className="text-sm text-gray-600">{t("invoicing.manageYourCustomers")}</p>
                 </div>
               </div>
             </Link>
@@ -64,8 +66,8 @@ export default function Index({ locale }: IndexProps) {
                   </div>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Invoices</h3>
-                  <p className="text-sm text-gray-600">Create and manage invoices</p>
+                  <h3 className="text-lg font-semibold text-gray-900">{t("invoicing.invoices")}</h3>
+                  <p className="text-sm text-gray-600">{t("invoicing.createAndManageInvoices")}</p>
                 </div>
               </div>
             </Link>
@@ -81,39 +83,39 @@ export default function Index({ locale }: IndexProps) {
                   </div>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Credit Notes</h3>
-                  <p className="text-sm text-gray-600">Issue credit notes</p>
+                  <h3 className="text-lg font-semibold text-gray-900">{t("invoicing.creditNotes")}</h3>
+                  <p className="text-sm text-gray-600">{t("invoicing.issueCreditNotes")}</p>
                 </div>
               </div>
             </Link>
           </div>
 
           <div className="mt-12 bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+            <h2 className="text-xl font-semibold mb-4">{t("invoicing.quickActions")}</h2>
             <div className="flex flex-wrap gap-3">
               <Link 
                 href="/invoices/new"
                 className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded font-medium"
               >
-                Create Invoice
+                {t("invoicing.createInvoice")}
               </Link>
               <Link 
                 href="/credit-notes/new"
                 className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded font-medium"
               >
-                Create Credit Note
+                {t("invoicing.createCreditNote")}
               </Link>
               <Link 
                 href="/companies"
                 className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded font-medium"
               >
-                Add Company
+                {t("invoicing.addCompany")}
               </Link>
               <Link 
                 href="/customers"
                 className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded font-medium"
               >
-                Add Customer
+                {t("invoicing.addCustomer")}
               </Link>
             </div>
           </div>

@@ -51,7 +51,8 @@ defmodule AshTypescriptReactExample.MixProject do
       {:ash_phoenix, "~> 2.0"},
       {:ash, "~> 3.5", override: true},
       {:ash_state_machine, "~> 0.2"},
-      {:ash_typescript, git: "https://github.com/Torkan/ash_typescript", branch: "main"},
+      # {:ash_typescript, git: "https://github.com/Torkan/ash_typescript", branch: "main"},
+      {:ash_typescript, path: "../ash_typescript"},
       {:igniter, "~> 0.6", only: [:dev, :test]},
       {:phoenix, "~> 1.8.0"},
       {:phoenix_ecto, "~> 4.5"},
@@ -89,7 +90,13 @@ defmodule AshTypescriptReactExample.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ash.setup", "assets.build", "run priv/repo/seeds.exs"],
+      setup: [
+        "deps.get",
+        "ash.setup",
+        "assets.build",
+        "ash_typescript.codegen",
+        "run priv/repo/seeds.exs"
+      ],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       "ash_postgres.reset": [

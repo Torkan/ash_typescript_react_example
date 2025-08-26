@@ -14,9 +14,11 @@ export default function InvoicingLayout({ locale, children }: Props) {
   }, []);
 
   const handleLocaleChange = (newLocale: string) => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const currentUrl = window.location.pathname + window.location.search;
-      router.get(`/session/set_locale?locale=${newLocale}&return_to=${encodeURIComponent(currentUrl)}`);
+      router.get(
+        `/session/set_locale?locale=${newLocale}&return_to=${encodeURIComponent(currentUrl)}`,
+      );
     }
   };
 
@@ -30,7 +32,7 @@ export default function InvoicingLayout({ locale, children }: Props) {
 
   const isActive = (href: string) => {
     if (!mounted) return false;
-    return window.location.pathname.startsWith(href);
+    return window.location.pathname === href;
   };
 
   return (
@@ -80,9 +82,7 @@ export default function InvoicingLayout({ locale, children }: Props) {
       </header>
 
       {/* Main Content */}
-      <main>
-        {children}
-      </main>
+      <main>{children}</main>
     </div>
   );
 }

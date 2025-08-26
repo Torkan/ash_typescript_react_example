@@ -23,6 +23,7 @@ import CreditNoteForm, {
 } from "../../lib/components/CreditNoteForm";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
 import { useAshRpcForm } from "../../lib/useAshRpcForm";
+import { getI18n } from "../../lib/i18n";
 
 interface EditCreditNotePageProps {
   current_user_id: string;
@@ -51,6 +52,7 @@ const creditNoteFields = [
 ] satisfies GetCreditNoteFields;
 
 export default function EditCreditNote({ locale, credit_note_id }: EditCreditNotePageProps) {
+  const { t } = getI18n(locale);
   const [companies, setCompanies] = useState<CompanyType[]>([]);
   const [customers, setCustomers] = useState<CustomerType[]>([]);
   const [invoices, setInvoices] = useState<InvoiceType[]>([]);
@@ -185,7 +187,7 @@ export default function EditCreditNote({ locale, credit_note_id }: EditCreditNot
       setInvoices(invoicesResult.data);
       setCreditNote(creditNoteResult.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load data");
+      setError(err instanceof Error ? err.message : t("invoicing.failedToLoadData"));
       console.error(err);
     } finally {
       setLoading(false);
@@ -200,7 +202,7 @@ export default function EditCreditNote({ locale, credit_note_id }: EditCreditNot
     return (
       <InvoicingLayout locale={locale}>
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-lg">Loading credit note...</div>
+          <div className="text-lg">{t("invoicing.loadingCreditNote")}</div>
         </div>
       </InvoicingLayout>
     );
@@ -217,13 +219,13 @@ export default function EditCreditNote({ locale, credit_note_id }: EditCreditNot
             onClick={loadData}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mr-2"
           >
-            Retry
+            {t("invoicing.retry")}
           </button>
           <Link
             href="/credit-notes"
             className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded inline-block"
           >
-            Back to Credit Notes
+            {t("invoicing.backToCreditNotes")}
           </Link>
         </div>
       </InvoicingLayout>
@@ -242,6 +244,7 @@ export default function EditCreditNote({ locale, credit_note_id }: EditCreditNot
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         isEditing={true}
+        locale={locale}
       />
     </InvoicingLayout>
   );

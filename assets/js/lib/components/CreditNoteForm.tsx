@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getI18n } from "../i18n";
 
 export interface CreditNoteLine {
   description: string;
@@ -111,6 +112,7 @@ interface CreditNoteFormProps {
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
   isEditing: boolean;
+  locale: string;
 }
 
 export default function CreditNoteForm({
@@ -123,7 +125,9 @@ export default function CreditNoteForm({
   onSubmit,
   onCancel,
   isEditing,
+  locale,
 }: CreditNoteFormProps) {
+  const { t } = getI18n(locale);
   const [selectedCompany, setSelectedCompany] = useState<CompanyType | null>(
     null,
   );
@@ -320,24 +324,24 @@ export default function CreditNoteForm({
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">
-          {isEditing ? "Edit Credit Note" : "New Credit Note"}
+          {isEditing ? t("invoicing.editCreditNote") : t("invoicing.newCreditNote")}
         </h1>
         <button
           onClick={onCancel}
           className="text-gray-600 hover:text-gray-800"
         >
-          Back to Credit Notes
+          {t("invoicing.backToCreditNotesText")}
         </button>
       </div>
 
       <form onSubmit={onSubmit} className="space-y-6">
         <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Credit Note Details</h2>
+          <h2 className="text-xl font-semibold mb-4">{t("invoicing.creditNoteDetails")}</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Issue Date *
+                {t("invoicing.issueDate")} *
               </label>
               <input
                 type="date"
@@ -359,7 +363,7 @@ export default function CreditNoteForm({
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Currency *
+                {t("invoicing.currency")} *
               </label>
               <select
                 required
@@ -378,14 +382,14 @@ export default function CreditNoteForm({
 
           <div className="mt-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Reference Invoice (Optional)
+              {t("invoicing.referenceInvoice")}
             </label>
             <select
               value={selectedInvoice?.id || ""}
               onChange={(e) => handleInvoiceSelect(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Select an invoice to credit...</option>
+              <option value="">{t("invoicing.selectInvoiceToCredit")}</option>
               {invoices.map(invoice => (
                 <option key={invoice.id} value={invoice.id}>
                   {invoice.serialNumber || 'N/A'} - {invoice.customerName} ({invoice.currency})
@@ -396,7 +400,7 @@ export default function CreditNoteForm({
 
           <div className="mt-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Credit Reason *
+              {t("invoicing.creditReason")} *
             </label>
             <textarea
               required
@@ -404,7 +408,7 @@ export default function CreditNoteForm({
               value={formData.creditReason}
               onChange={(e) => onChange({ ...formData, creditReason: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Please describe the reason for this credit note..."
+              placeholder={t("invoicing.creditReason")}
             />
             {fieldErrors?.creditReason && fieldErrors.creditReason.length > 0 && (
               <div className="mt-1">
@@ -420,17 +424,17 @@ export default function CreditNoteForm({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">From (Company) *</h2>
+            <h2 className="text-xl font-semibold mb-4">{t("invoicing.fromCompany")} *</h2>
             <select
               required
               value={selectedCompany?.id || ""}
               onChange={(e) => handleCompanySelect(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
             >
-              <option value="">Select a company...</option>
+              <option value="">{t("invoicing.selectCompanyPrompt")}</option>
               {companies.map(company => (
                 <option key={company.id} value={company.id}>
-                  {company.name} {company.isDefault && "(Default)"}
+                  {company.name} {company.isDefault && t("invoicing.defaultLabel")}
                 </option>
               ))}
             </select>
@@ -442,20 +446,20 @@ export default function CreditNoteForm({
                 {selectedCompany.addressLine2 && <p>{selectedCompany.addressLine2}</p>}
                 <p>{selectedCompany.city} {selectedCompany.postalCode}</p>
                 <p>{selectedCompany.country}</p>
-                {selectedCompany.vatNumber && <p>VAT: {selectedCompany.vatNumber}</p>}
+                {selectedCompany.vatNumber && <p>{t("invoicing.vatNumber")}: {selectedCompany.vatNumber}</p>}
               </div>
             )}
           </div>
 
           <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">To (Customer) *</h2>
+            <h2 className="text-xl font-semibold mb-4">{t("invoicing.toCustomer")} *</h2>
             <select
               required
               value={selectedCustomer?.id || ""}
               onChange={(e) => handleCustomerSelect(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
             >
-              <option value="">Select a customer...</option>
+              <option value="">{t("invoicing.selectCustomerPrompt")}</option>
               {customers.map(customer => (
                 <option key={customer.id} value={customer.id}>
                   {customer.name}
@@ -470,7 +474,7 @@ export default function CreditNoteForm({
                 {selectedCustomer.addressLine2 && <p>{selectedCustomer.addressLine2}</p>}
                 <p>{selectedCustomer.city} {selectedCustomer.postalCode}</p>
                 <p>{selectedCustomer.country}</p>
-                {selectedCustomer.vatNumber && <p>VAT: {selectedCustomer.vatNumber}</p>}
+                {selectedCustomer.vatNumber && <p>{t("invoicing.vatNumber")}: {selectedCustomer.vatNumber}</p>}
               </div>
             )}
           </div>
@@ -478,13 +482,13 @@ export default function CreditNoteForm({
 
         <div className="bg-white shadow rounded-lg p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Credit Note Lines</h2>
+            <h2 className="text-xl font-semibold">{t("invoicing.creditNoteLines")}</h2>
             <button
               type="button"
               onClick={addLine}
               className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
             >
-              Add Line
+              {t("invoicing.addLine")}
             </button>
           </div>
 
@@ -492,11 +496,11 @@ export default function CreditNoteForm({
             <table className="min-w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-2">Description</th>
-                  <th className="text-left py-2 w-24">Quantity</th>
-                  <th className="text-left py-2 w-32">Unit Price</th>
-                  <th className="text-left py-2 w-24">Tax %</th>
-                  <th className="text-right py-2 w-32">Total</th>
+                  <th className="text-left py-2">{t("invoicing.description")}</th>
+                  <th className="text-left py-2 w-24">{t("invoicing.quantity")}</th>
+                  <th className="text-left py-2 w-32">{t("invoicing.unitPrice")}</th>
+                  <th className="text-left py-2 w-24">{t("invoicing.taxRate")}</th>
+                  <th className="text-right py-2 w-32">{t("invoicing.total")}</th>
                   <th className="w-16"></th>
                 </tr>
               </thead>
@@ -511,7 +515,7 @@ export default function CreditNoteForm({
                           updateLine(index, "description", e.target.value)
                         }
                         className="w-full px-2 py-1 border border-gray-300 rounded"
-                        placeholder="Description"
+                        placeholder={t("invoicing.description")}
                       />
                     </td>
                     <td className="py-2 pr-2">
@@ -558,7 +562,7 @@ export default function CreditNoteForm({
                           onClick={() => removeLine(index)}
                           className="text-red-600 hover:text-red-800"
                         >
-                          Remove
+                          {t("invoicing.removeLine")}
                         </button>
                       )}
                     </td>
@@ -570,9 +574,9 @@ export default function CreditNoteForm({
 
           <div className="mt-4 flex justify-end">
             <div className="text-right space-y-1">
-              <div>Subtotal: {formData.currency} {totals.subtotal.toFixed(2)}</div>
-              <div>Tax: {formData.currency} {totals.tax.toFixed(2)}</div>
-              <div className="font-bold text-lg">Total: {formData.currency} {totals.total.toFixed(2)}</div>
+              <div>{t("invoicing.subtotal")}: {formData.currency} {totals.subtotal.toFixed(2)}</div>
+              <div>{t("invoicing.tax")}: {formData.currency} {totals.tax.toFixed(2)}</div>
+              <div className="font-bold text-lg">{t("invoicing.total")}: {formData.currency} {totals.total.toFixed(2)}</div>
             </div>
           </div>
         </div>
@@ -583,13 +587,13 @@ export default function CreditNoteForm({
             onClick={onCancel}
             className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
           >
-            Cancel
+            {t("common.cancel")}
           </button>
           <button
             type="submit"
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
           >
-            {isEditing ? "Update Credit Note" : "Create Credit Note"}
+            {isEditing ? t("invoicing.updateCreditNote") : t("invoicing.createCreditNote")}
           </button>
         </div>
       </form>

@@ -8,6 +8,7 @@ import {
   buildCSRFHeaders,
 } from "../../ash_rpc";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
+import { getI18n } from "../../lib/i18n";
 
 interface EditCustomerPageProps {
   current_user_id: string;
@@ -16,22 +17,35 @@ interface EditCustomerPageProps {
   customer_id: string;
 }
 
-const defaultCustomerData = {
+type CustomerData = {
+  name: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  vatNumber: string;
+  email: string;
+  phone: string;
+};
+
+const getDefaultCustomerData = (t: any): CustomerData => ({
   name: "",
   addressLine1: "",
   addressLine2: "",
   city: "",
   postalCode: "",
-  country: "Norway",
+  country: t("countries.norway"),
   vatNumber: "",
   email: "",
   phone: "",
-};
+});
 
 export default function EditCustomer({
   customer_id,
   locale,
 }: EditCustomerPageProps) {
+  const { t } = getI18n(locale);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -44,7 +58,7 @@ export default function EditCustomer({
     isSubmitting,
     error,
   } = useAshRpcForm({
-    initialData: defaultCustomerData,
+    initialData: getDefaultCustomerData(t),
     zodSchema: updateCustomerZodschema,
     onSubmit: async (data) => {
       const result = await updateCustomer({
@@ -101,7 +115,7 @@ export default function EditCustomer({
         }
         setLoadError(null);
       } catch (err) {
-        setLoadError("Failed to load customer");
+        setLoadError(t("invoicing.failedToLoadData"));
         console.error(err);
       } finally {
         setLoading(false);
@@ -111,7 +125,7 @@ export default function EditCustomer({
     loadCustomer();
   }, [customer_id, setFormData]);
 
-  const handleInputChange = (field: keyof typeof defaultCustomerData) => (
+  const handleInputChange = (field: keyof CustomerData) => (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     handleChange({
@@ -124,7 +138,7 @@ export default function EditCustomer({
     return (
       <InvoicingLayout locale={locale}>
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-lg">Loading customer...</div>
+          <div className="text-lg">{t("invoicing.loadingCustomer")}</div>
         </div>
       </InvoicingLayout>
     );
@@ -141,7 +155,7 @@ export default function EditCustomer({
             href="/customers"
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
           >
-            Back to Customers
+            {t("invoicing.backToCustomers")}
           </a>
         </div>
       </InvoicingLayout>
@@ -152,12 +166,12 @@ export default function EditCustomer({
     <InvoicingLayout locale={locale}>
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Edit Customer</h1>
+          <h1 className="text-3xl font-bold">{t("invoicing.editCustomer")}</h1>
           <a
             href="/customers"
             className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
           >
-            Back to Customers
+            {t("invoicing.backToCustomers")}
           </a>
         </div>
 
@@ -174,7 +188,7 @@ export default function EditCustomer({
           >
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Customer Name *
+                {t("invoicing.customerName")} *
               </label>
               <input
                 type="text"
@@ -192,7 +206,7 @@ export default function EditCustomer({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
+                {t("common.email")}
               </label>
               <input
                 type="email"
@@ -209,7 +223,7 @@ export default function EditCustomer({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Address Line 1 *
+                {t("invoicing.addressLine1")} *
               </label>
               <input
                 type="text"
@@ -227,7 +241,7 @@ export default function EditCustomer({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Address Line 2
+                {t("invoicing.addressLine2")}
               </label>
               <input
                 type="text"
@@ -244,7 +258,7 @@ export default function EditCustomer({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                City *
+                {t("forms.city")} *
               </label>
               <input
                 type="text"
@@ -262,7 +276,7 @@ export default function EditCustomer({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Postal Code *
+                {t("forms.postalCode")} *
               </label>
               <input
                 type="text"
@@ -280,7 +294,7 @@ export default function EditCustomer({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Country *
+                {t("forms.country")} *
               </label>
               <input
                 type="text"
@@ -298,7 +312,7 @@ export default function EditCustomer({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                VAT Number
+                {t("invoicing.vatNumber")}
               </label>
               <input
                 type="text"
@@ -315,7 +329,7 @@ export default function EditCustomer({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone
+                {t("invoicing.phone")}
               </label>
               <input
                 type="tel"
@@ -336,13 +350,13 @@ export default function EditCustomer({
                 disabled={isSubmitting}
                 className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white px-4 py-2 rounded"
               >
-                {isSubmitting ? "Updating..." : "Update Customer"}
+                {isSubmitting ? t("invoicing.updating") : t("invoicing.updateCustomer")}
               </button>
               <Link
                 href="/customers"
                 className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded inline-block text-center"
               >
-                Cancel
+                {t("common.cancel")}
               </Link>
             </div>
           </form>

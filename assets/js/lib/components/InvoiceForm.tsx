@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getI18n } from "../i18n";
 
 export interface InvoiceLine {
   description: string;
@@ -99,6 +100,7 @@ interface InvoiceFormProps {
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
   isEditing: boolean;
+  locale: string;
 }
 
 export default function InvoiceForm({
@@ -110,7 +112,9 @@ export default function InvoiceForm({
   onSubmit,
   onCancel,
   isEditing,
+  locale,
 }: InvoiceFormProps) {
+  const { t } = getI18n(locale);
   const [selectedCompany, setSelectedCompany] = useState<CompanyType | null>(
     null,
   );
@@ -258,24 +262,24 @@ export default function InvoiceForm({
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">
-          {isEditing ? "Edit Invoice" : "New Invoice"}
+          {isEditing ? t("invoicing.editInvoice") : t("invoicing.newInvoice")}
         </h1>
         <button
           onClick={onCancel}
           className="text-gray-600 hover:text-gray-800"
         >
-          Back to Invoices
+          {t("invoicing.backToInvoices")}
         </button>
       </div>
 
       <form onSubmit={onSubmit} className="space-y-6">
         <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Invoice Details</h2>
+          <h2 className="text-xl font-semibold mb-4">{t("invoicing.invoiceDetails")}</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Issue Date *
+                {t("invoicing.issueDate")} *
               </label>
               <input
                 type="date"
@@ -299,7 +303,7 @@ export default function InvoiceForm({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Due Date *
+                {t("invoicing.dueDate")} *
               </label>
               <input
                 type="date"
@@ -323,7 +327,7 @@ export default function InvoiceForm({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Currency *
+                {t("invoicing.currency")} *
               </label>
               <select
                 required
@@ -345,17 +349,17 @@ export default function InvoiceForm({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">From (Company) *</h2>
+            <h2 className="text-xl font-semibold mb-4">{t("invoicing.fromCompany")} *</h2>
             <select
               required
               value={selectedCompany?.id || ""}
               onChange={(e) => handleCompanySelect(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
             >
-              <option value="">Select a company...</option>
+              <option value="">{t("invoicing.selectCompany")}</option>
               {companies.map((company) => (
                 <option key={company.id} value={company.id}>
-                  {company.name} {company.isDefault && "(Default)"}
+                  {company.name} {company.isDefault && t("invoicing.defaultLabel")}
                 </option>
               ))}
             </select>
@@ -372,21 +376,21 @@ export default function InvoiceForm({
                 </p>
                 <p>{selectedCompany.country}</p>
                 {selectedCompany.vatNumber && (
-                  <p>VAT: {selectedCompany.vatNumber}</p>
+                  <p>{t("invoicing.vatNumber")}: {selectedCompany.vatNumber}</p>
                 )}
               </div>
             )}
           </div>
 
           <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">To (Customer) *</h2>
+            <h2 className="text-xl font-semibold mb-4">{t("invoicing.toCustomer")} *</h2>
             <select
               required
               value={selectedCustomer?.id || ""}
               onChange={(e) => handleCustomerSelect(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
             >
-              <option value="">Select a customer...</option>
+              <option value="">{t("invoicing.selectCustomer")}</option>
               {customers.map((customer) => (
                 <option key={customer.id} value={customer.id}>
                   {customer.name}
@@ -406,7 +410,7 @@ export default function InvoiceForm({
                 </p>
                 <p>{selectedCustomer.country}</p>
                 {selectedCustomer.vatNumber && (
-                  <p>VAT: {selectedCustomer.vatNumber}</p>
+                  <p>{t("invoicing.vatNumber")}: {selectedCustomer.vatNumber}</p>
                 )}
               </div>
             )}
@@ -415,13 +419,13 @@ export default function InvoiceForm({
 
         <div className="bg-white shadow rounded-lg p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Invoice Lines</h2>
+            <h2 className="text-xl font-semibold">{t("invoicing.invoiceLines")}</h2>
             <button
               type="button"
               onClick={addLine}
               className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
             >
-              Add Line
+              {t("invoicing.addLine")}
             </button>
           </div>
 
@@ -429,11 +433,11 @@ export default function InvoiceForm({
             <table className="min-w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-2">Description</th>
-                  <th className="text-left py-2 w-24">Quantity</th>
-                  <th className="text-left py-2 w-32">Unit Price</th>
-                  <th className="text-left py-2 w-24">Tax %</th>
-                  <th className="text-right py-2 w-32">Total</th>
+                  <th className="text-left py-2">{t("invoicing.description")}</th>
+                  <th className="text-left py-2 w-24">{t("invoicing.quantity")}</th>
+                  <th className="text-left py-2 w-32">{t("invoicing.unitPrice")}</th>
+                  <th className="text-left py-2 w-24">{t("invoicing.taxRate")}</th>
+                  <th className="text-right py-2 w-32">{t("invoicing.total")}</th>
                   <th className="w-16"></th>
                 </tr>
               </thead>
@@ -508,13 +512,13 @@ export default function InvoiceForm({
           <div className="mt-4 flex justify-end">
             <div className="text-right space-y-1">
               <div>
-                Subtotal: {formData.currency} {totals.subtotal.toFixed(2)}
+                {t("invoicing.subtotal")}: {formData.currency} {totals.subtotal.toFixed(2)}
               </div>
               <div>
-                Tax: {formData.currency} {totals.tax.toFixed(2)}
+                {t("invoicing.tax")}: {formData.currency} {totals.tax.toFixed(2)}
               </div>
               <div className="font-bold text-lg">
-                Total: {formData.currency} {totals.total.toFixed(2)}
+                {t("invoicing.total")}: {formData.currency} {totals.total.toFixed(2)}
               </div>
             </div>
           </div>
@@ -526,13 +530,13 @@ export default function InvoiceForm({
             onClick={onCancel}
             className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
           >
-            Cancel
+            {t("common.cancel")}
           </button>
           <button
             type="submit"
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
           >
-            {isEditing ? "Update Invoice" : "Create Invoice"}
+            {isEditing ? t("invoicing.updateInvoice") : t("invoicing.createInvoice")}
           </button>
         </div>
       </form>

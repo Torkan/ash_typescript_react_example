@@ -6,6 +6,7 @@ import {
   GetInvoiceFields,
 } from "../../ash_rpc";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
+import { getI18n } from "../../lib/i18n";
 
 interface ViewInvoicePageProps {
   current_user_id: string;
@@ -43,6 +44,7 @@ const invoiceFields = [
 ] satisfies GetInvoiceFields;
 
 export default function ViewInvoice({ locale, invoice_id, invoice: initialInvoice }: ViewInvoicePageProps) {
+  const { t } = getI18n(locale);
   const [invoice, setInvoice] = useState<any>(initialInvoice);
   const [loading, setLoading] = useState(!initialInvoice);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +72,7 @@ export default function ViewInvoice({ locale, invoice_id, invoice: initialInvoic
 
       setInvoice(invoiceResult.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load invoice");
+      setError(err instanceof Error ? err.message : t("invoicing.failedToLoadInvoices"));
       console.error(err);
     } finally {
       setLoading(false);
@@ -81,7 +83,7 @@ export default function ViewInvoice({ locale, invoice_id, invoice: initialInvoic
     return (
       <InvoicingLayout locale={locale}>
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-lg">Loading invoice...</div>
+          <div className="text-lg">{t("invoicing.loadingInvoice")}</div>
         </div>
       </InvoicingLayout>
     );
@@ -98,13 +100,13 @@ export default function ViewInvoice({ locale, invoice_id, invoice: initialInvoic
             onClick={loadInvoice}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mr-2"
           >
-            Retry
+            {t("invoicing.retry")}
           </button>
           <Link
             href="/invoices"
             className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded inline-block"
           >
-            Back to Invoices
+            {t("invoicing.backToInvoices")}
           </Link>
         </div>
       </InvoicingLayout>
@@ -116,13 +118,13 @@ export default function ViewInvoice({ locale, invoice_id, invoice: initialInvoic
       <InvoicingLayout locale={locale}>
         <div className="container mx-auto px-4 py-8">
           <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
-            Invoice not found
+            {t("invoicing.invoiceNotFound")}
           </div>
           <Link
             href="/invoices"
             className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded inline-block"
           >
-            Back to Invoices
+            {t("invoicing.backToInvoices")}
           </Link>
         </div>
       </InvoicingLayout>
@@ -151,20 +153,20 @@ export default function ViewInvoice({ locale, invoice_id, invoice: initialInvoic
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-900">
-            Invoice {invoice.serialNumber || `#${invoice.id.slice(-8)}`}
+            {t("invoicing.invoice")} {invoice.serialNumber || `#${invoice.id.slice(-8)}`}
           </h1>
           <div className="flex gap-2">
             <Link
               href={`/invoices/${invoice_id}/edit`}
               className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
             >
-              Edit
+              {t("common.edit")}
             </Link>
             <Link
               href="/invoices"
               className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
             >
-              Back to Invoices
+              {t("invoicing.backToInvoices")}
             </Link>
           </div>
         </div>
@@ -172,7 +174,7 @@ export default function ViewInvoice({ locale, invoice_id, invoice: initialInvoic
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
           <div className="px-6 py-4 bg-gray-50 border-b">
             <div className="flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-gray-900">Invoice Details</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t("invoicing.invoiceDetails")}</h2>
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStateColor(invoice.state)}`}>
                 {invoice.state.charAt(0).toUpperCase() + invoice.state.slice(1)}
               </span>
@@ -182,7 +184,7 @@ export default function ViewInvoice({ locale, invoice_id, invoice: initialInvoic
           <div className="px-6 py-4 space-y-6">
             {/* Invoice Information */}
             <div>
-              <h3 className="text-md font-medium text-gray-900 mb-3">Invoice Information</h3>
+              <h3 className="text-md font-medium text-gray-900 mb-3">{t("invoicing.invoiceInformation")}</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Issue Date</label>
@@ -201,7 +203,7 @@ export default function ViewInvoice({ locale, invoice_id, invoice: initialInvoic
 
             {/* Company Information */}
             <div>
-              <h3 className="text-md font-medium text-gray-900 mb-3">Company Information</h3>
+              <h3 className="text-md font-medium text-gray-900 mb-3">{t("invoicing.companyInformation")}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Company Name</label>
@@ -233,7 +235,7 @@ export default function ViewInvoice({ locale, invoice_id, invoice: initialInvoic
 
             {/* Customer Information */}
             <div>
-              <h3 className="text-md font-medium text-gray-900 mb-3">Customer Information</h3>
+              <h3 className="text-md font-medium text-gray-900 mb-3">{t("invoicing.customerInformation")}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Customer Name</label>

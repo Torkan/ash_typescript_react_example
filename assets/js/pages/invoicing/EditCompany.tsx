@@ -13,6 +13,7 @@ import {
 import CompanyForm, { CompanyFormData } from "$lib/components/CompanyForm";
 import { useAshRpcForm } from "$lib/useAshRpcForm";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
+import { getI18n } from "../../lib/i18n";
 
 interface EditCompanyPageProps {
   current_user_id: string;
@@ -23,13 +24,14 @@ interface EditCompanyPageProps {
 }
 
 export default function EditCompany({ company_id, company, locale }: EditCompanyPageProps) {
+  const { t } = getI18n(locale);
   const [error, setError] = useState<string | null>(null);
 
   if (!company) {
     return (
       <InvoicingLayout locale={locale}>
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-lg text-red-600">Company not found</div>
+          <div className="text-lg text-red-600">{t("invoicing.companyNotFound")}</div>
         </div>
       </InvoicingLayout>
     );
@@ -78,7 +80,7 @@ export default function EditCompany({ company_id, company, locale }: EditCompany
   const handleDelete = async () => {
     if (!company_id) return;
 
-    if (confirm("Are you sure you want to delete this company?")) {
+    if (confirm(t("invoicing.confirmDeleteCompany"))) {
       try {
         const result = await deleteCompany({
           primaryKey: company_id,
@@ -89,7 +91,7 @@ export default function EditCompany({ company_id, company, locale }: EditCompany
         }
         router.visit("/companies");
       } catch (err) {
-        setError("Failed to delete company");
+        setError(t("invoicing.failedToDeleteCompany"));
         console.error(err);
       }
     }
@@ -108,13 +110,13 @@ export default function EditCompany({ company_id, company, locale }: EditCompany
               href="/companies"
               className="text-blue-600 hover:text-blue-800 text-sm font-medium"
             >
-              ← Back to Companies
+              {t("invoicing.backToCompanies")}
             </Link>
             <button
               onClick={handleDelete}
               className="text-red-600 hover:text-red-800 text-sm font-medium"
             >
-              Delete Company
+              {t("invoicing.deleteCompany")}
             </button>
           </div>
 
@@ -131,6 +133,7 @@ export default function EditCompany({ company_id, company, locale }: EditCompany
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             isEditing={true}
+            locale={locale}
           />
         </div>
       </div>

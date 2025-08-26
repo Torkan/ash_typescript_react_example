@@ -21,6 +21,7 @@ import InvoiceForm, {
 } from "../../lib/components/InvoiceForm";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
 import { useAshRpcForm } from "../../lib/useAshRpcForm";
+import { getI18n } from "../../lib/i18n";
 
 interface EditInvoicePageProps {
   current_user_id: string;
@@ -73,6 +74,7 @@ export default function EditInvoice({ locale, invoice_id }: EditInvoicePageProps
   const [invoice, setInvoice] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = getI18n(locale);
 
   const { formData, fieldErrors, handleChange, handleSubmit, error: formError } =
     useAshRpcForm<InvoiceFormData, UpdateInvoiceInput>({
@@ -191,7 +193,7 @@ export default function EditInvoice({ locale, invoice_id }: EditInvoicePageProps
       
       setInvoice(invoiceResult.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load data");
+      setError(err instanceof Error ? err.message : t("invoicing.failedToLoadData"));
       console.error(err);
     } finally {
       setLoading(false);
@@ -206,7 +208,7 @@ export default function EditInvoice({ locale, invoice_id }: EditInvoicePageProps
     return (
       <InvoicingLayout locale={locale}>
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-lg">Loading invoice...</div>
+          <div className="text-lg">{t("invoicing.loadingInvoice")}</div>
         </div>
       </InvoicingLayout>
     );
@@ -223,13 +225,13 @@ export default function EditInvoice({ locale, invoice_id }: EditInvoicePageProps
             onClick={loadData}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mr-2"
           >
-            Retry
+            {t("invoicing.retry")}
           </button>
           <Link
             href="/invoices"
             className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded inline-block"
           >
-            Back to Invoices
+            {t("invoicing.backToInvoices")}
           </Link>
         </div>
       </InvoicingLayout>
@@ -247,6 +249,7 @@ export default function EditInvoice({ locale, invoice_id }: EditInvoicePageProps
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         isEditing={true}
+        locale={locale}
       />
     </InvoicingLayout>
   );

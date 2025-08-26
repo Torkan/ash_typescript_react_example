@@ -13,6 +13,7 @@ import {
 import CompanyForm, { CompanyFormData } from "$lib/components/CompanyForm";
 import { useAshRpcForm } from "$lib/useAshRpcForm";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
+import { getI18n } from "../../lib/i18n";
 
 interface NewCompanyPageProps {
   current_user_id: string;
@@ -23,6 +24,7 @@ interface NewCompanyPageProps {
 }
 
 export default function NewCompany({ locale }: NewCompanyPageProps) {
+  const { t } = getI18n(locale);
   const { formData, fieldErrors, handleChange, handleSubmit, error } =
     useAshRpcForm<CompanyFormData, CreateCompanyInput>({
       initialData: {
@@ -31,7 +33,7 @@ export default function NewCompany({ locale }: NewCompanyPageProps) {
         addressLine2: "",
         city: "",
         postalCode: "",
-        country: "Norway",
+        country: t("countries.norway"),
         vatNumber: "",
         email: "",
         phone: "",
@@ -69,7 +71,7 @@ export default function NewCompany({ locale }: NewCompanyPageProps) {
               href="/companies"
               className="text-blue-600 hover:text-blue-800 text-sm font-medium"
             >
-              ← Back to Companies
+              {t("invoicing.backToCompanies")}
             </Link>
           </div>
 
@@ -86,6 +88,7 @@ export default function NewCompany({ locale }: NewCompanyPageProps) {
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             isEditing={false}
+            locale={locale}
           />
         </div>
       </div>

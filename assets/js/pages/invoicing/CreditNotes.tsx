@@ -8,6 +8,7 @@ import {
   CreditNotesListView,
 } from "../../ash_rpc";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
+import { getI18n } from "../../lib/i18n";
 
 interface CreditNotesPageProps {
   current_user_id: string;
@@ -18,12 +19,13 @@ interface CreditNotesPageProps {
 
 
 export default function CreditNotes({ credit_notes: initialCreditNotes, locale }: CreditNotesPageProps) {
+  const { t } = getI18n(locale);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "draft" | "finalized" | "cancelled">("all");
 
 
   const handleFinalize = async (id: string) => {
-    if (confirm("Are you sure you want to finalize this credit note? This action cannot be undone.")) {
+    if (confirm(t("invoicing.confirmFinalizeCreditNote"))) {
       try {
         const result = await finalizeCreditNote({
           primaryKey: id,
@@ -35,14 +37,14 @@ export default function CreditNotes({ credit_notes: initialCreditNotes, locale }
         }
         window.location.reload();
       } catch (err) {
-        setError("Failed to finalize credit note");
+        setError(t("invoicing.failedToFinalizeCreditNote"));
         console.error(err);
       }
     }
   };
 
   const handleCancel = async (id: string) => {
-    if (confirm("Are you sure you want to cancel this credit note?")) {
+    if (confirm(t("invoicing.confirmCancelCreditNote"))) {
       try {
         const result = await cancelCreditNote({
           primaryKey: id,
@@ -54,14 +56,14 @@ export default function CreditNotes({ credit_notes: initialCreditNotes, locale }
         }
         window.location.reload();
       } catch (err) {
-        setError("Failed to cancel credit note");
+        setError(t("invoicing.failedToCancelCreditNote"));
         console.error(err);
       }
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this draft credit note?")) {
+    if (confirm(t("invoicing.confirmDeleteCreditNote"))) {
       try {
         const result = await deleteCreditNote({
           primaryKey: id,
@@ -72,7 +74,7 @@ export default function CreditNotes({ credit_notes: initialCreditNotes, locale }
         }
         window.location.reload();
       } catch (err) {
-        setError("Failed to delete credit note");
+        setError(t("invoicing.failedToDeleteCreditNote"));
         console.error(err);
       }
     }
@@ -103,12 +105,12 @@ export default function CreditNotes({ credit_notes: initialCreditNotes, locale }
     <InvoicingLayout locale={locale}>
       <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Credit Notes</h1>
+        <h1 className="text-3xl font-bold">{t("invoicing.creditNotes")}</h1>
         <Link
           href="/credit-notes/new"
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
         >
-          New Credit Note
+          {t("invoicing.newCreditNote")}
         </Link>
       </div>
 
@@ -123,25 +125,25 @@ export default function CreditNotes({ credit_notes: initialCreditNotes, locale }
           onClick={() => setFilter("all")}
           className={`px-3 py-1 rounded ${filter === "all" ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
         >
-          All ({initialCreditNotes.length})
+          {t("common.all")} ({initialCreditNotes.length})
         </button>
         <button
           onClick={() => setFilter("draft")}
           className={`px-3 py-1 rounded ${filter === "draft" ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
         >
-          Draft ({initialCreditNotes.filter(cn => cn.state === "draft").length})
+          {t("invoicing.states.draft")} ({initialCreditNotes.filter(cn => cn.state === "draft").length})
         </button>
         <button
           onClick={() => setFilter("finalized")}
           className={`px-3 py-1 rounded ${filter === "finalized" ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
         >
-          Finalized ({initialCreditNotes.filter(cn => cn.state === "finalized").length})
+          {t("invoicing.states.finalized")} ({initialCreditNotes.filter(cn => cn.state === "finalized").length})
         </button>
         <button
           onClick={() => setFilter("cancelled")}
           className={`px-3 py-1 rounded ${filter === "cancelled" ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
         >
-          Cancelled ({initialCreditNotes.filter(cn => cn.state === "cancelled").length})
+          {t("invoicing.states.cancelled")} ({initialCreditNotes.filter(cn => cn.state === "cancelled").length})
         </button>
       </div>
 
@@ -150,28 +152,28 @@ export default function CreditNotes({ credit_notes: initialCreditNotes, locale }
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Credit Note #
+                {t("invoicing.creditNote")} #
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
+                {t("common.status")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Customer
+                {t("invoicing.customer")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Company
+                {t("invoicing.company")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Issue Date
+                {t("invoicing.issueDate")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Reason
+                {t("invoicing.creditReason")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Currency
+                {t("invoicing.currency")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
+                {t("common.actions")}
               </th>
             </tr>
           </thead>
@@ -179,11 +181,11 @@ export default function CreditNotes({ credit_notes: initialCreditNotes, locale }
             {filteredCreditNotes.map((creditNote) => (
               <tr key={creditNote.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {creditNote.serialNumber || 'Draft'}
+                  {creditNote.serialNumber || t("invoicing.states.draft")}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStateColor(creditNote.state)}`}>
-                    {creditNote.state}
+                    {t(`invoicing.states.${creditNote.state}`)}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -207,7 +209,7 @@ export default function CreditNotes({ credit_notes: initialCreditNotes, locale }
                       href={`/credit-notes/${creditNote.id}`}
                       className="text-blue-600 hover:text-blue-900"
                     >
-                      View
+                      {t("common.view")}
                     </Link>
                     {creditNote.state === 'draft' && (
                       <>
@@ -215,25 +217,25 @@ export default function CreditNotes({ credit_notes: initialCreditNotes, locale }
                           href={`/credit-notes/${creditNote.id}/edit`}
                           className="text-blue-600 hover:text-blue-900"
                         >
-                          Edit
+                          {t("common.edit")}
                         </Link>
                         <button
                           onClick={() => handleFinalize(creditNote.id)}
                           className="text-green-600 hover:text-green-900"
                         >
-                          Finalize
+                          {t("invoicing.finalize")}
                         </button>
                         <button
                           onClick={() => handleCancel(creditNote.id)}
                           className="text-orange-600 hover:text-orange-900"
                         >
-                          Cancel
+                          {t("common.cancel")}
                         </button>
                         <button
                           onClick={() => handleDelete(creditNote.id)}
                           className="text-red-600 hover:text-red-900"
                         >
-                          Delete
+                          {t("common.delete")}
                         </button>
                       </>
                     )}
@@ -246,7 +248,7 @@ export default function CreditNotes({ credit_notes: initialCreditNotes, locale }
 
         {filteredCreditNotes.length === 0 && (
           <div className="text-center py-8 text-gray-500">
-            No {filter !== "all" ? filter : ""} credit notes found.
+            {filter !== "all" ? t(`invoicing.noFilteredCreditNotesFound`, { filter: t(`invoicing.states.${filter}`) }) : t("invoicing.noCreditNotesFound")}
           </div>
         )}
       </div>

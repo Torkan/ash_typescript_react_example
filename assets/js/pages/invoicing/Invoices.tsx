@@ -10,6 +10,7 @@ import {
   invoicesListFields,
 } from "../../ash_rpc";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
+import { getI18n } from "../../lib/i18n";
 
 // Type for paginated invoice data from backend
 type PaginatedInvoices =
@@ -57,6 +58,7 @@ export default function Invoices({
   limit = "10",
   filter_state = "all",
 }: InvoicesPageProps) {
+  const { t } = getI18n(locale);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [invoices, setInvoices] = useState<InvoicesListView>(
@@ -83,7 +85,7 @@ export default function Invoices({
   const handleFinalize = async (id: string) => {
     if (
       confirm(
-        "Are you sure you want to finalize this invoice? This action cannot be undone.",
+        t("invoicing.confirmFinalizeInvoice"),
       )
     ) {
       try {
@@ -94,14 +96,14 @@ export default function Invoices({
         });
         window.location.reload();
       } catch (err) {
-        setError("Failed to finalize invoice");
+        setError(t("invoicing.failedToFinalizeInvoice"));
         console.error(err);
       }
     }
   };
 
   const handleCancel = async (id: string) => {
-    if (confirm("Are you sure you want to cancel this invoice?")) {
+    if (confirm(t("invoicing.confirmCancelInvoice"))) {
       try {
         await cancelInvoice({
           primaryKey: id,
@@ -110,14 +112,14 @@ export default function Invoices({
         });
         window.location.reload();
       } catch (err) {
-        setError("Failed to cancel invoice");
+        setError(t("invoicing.failedToCancelInvoice"));
         console.error(err);
       }
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this draft invoice?")) {
+    if (confirm(t("invoicing.confirmDeleteInvoice"))) {
       try {
         await deleteInvoice({
           primaryKey: id,
@@ -125,7 +127,7 @@ export default function Invoices({
         });
         window.location.reload();
       } catch (err) {
-        setError("Failed to delete invoice");
+        setError(t("invoicing.failedToDeleteInvoice"));
         console.error(err);
       }
     }
@@ -227,7 +229,7 @@ export default function Invoices({
       const newUrl = `/invoices${urlParams.toString() ? `?${urlParams.toString()}` : ""}`;
       window.history.replaceState(null, "", newUrl);
     } catch (err) {
-      setError("Failed to fetch invoices");
+      setError(t("invoicing.failedToLoadInvoices"));
       console.error(err);
     } finally {
       setLoading(false);
@@ -273,12 +275,12 @@ export default function Invoices({
     <InvoicingLayout locale={locale}>
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Invoices</h1>
+          <h1 className="text-3xl font-bold">{t("invoicing.invoices")}</h1>
           <Link
             href="/invoices/new"
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
           >
-            New Invoice
+            {t("invoicing.newInvoice")}
           </Link>
         </div>
 
@@ -297,7 +299,7 @@ export default function Invoices({
               } disabled:opacity-50`}
               disabled={loading}
             >
-              All
+              {t("common.all")}
             </button>
             <button
               onClick={() => handleFilterChange("draft")}
@@ -306,7 +308,7 @@ export default function Invoices({
               } disabled:opacity-50`}
               disabled={loading}
             >
-              Draft
+              {t("invoicing.states.draft")}
             </button>
             <button
               onClick={() => handleFilterChange("finalized")}
@@ -317,7 +319,7 @@ export default function Invoices({
               } disabled:opacity-50`}
               disabled={loading}
             >
-              Finalized
+              {t("invoicing.states.finalized")}
             </button>
             <button
               onClick={() => handleFilterChange("cancelled")}
@@ -328,14 +330,14 @@ export default function Invoices({
               } disabled:opacity-50`}
               disabled={loading}
             >
-              Cancelled
+              {t("invoicing.states.cancelled")}
             </button>
           </div>
 
           {/* Pagination controls */}
           <div className="flex gap-2 items-center">
             <span className="text-sm text-gray-500">
-              Showing {filteredInvoices.length} invoices (Keyset Pagination)
+              {t("invoicing.showingInvoices", { count: filteredInvoices.length })}
             </span>
             <button
               onClick={handlePrevPage}
@@ -346,7 +348,7 @@ export default function Invoices({
               }`}
               disabled={!pagination.hasPrev || loading}
             >
-              ← Previous
+              {t("invoicing.previous")}
             </button>
             <button
               onClick={handleNextPage}
@@ -357,7 +359,7 @@ export default function Invoices({
               }`}
               disabled={!pagination.hasNext || loading}
             >
-              Next →
+              {t("invoicing.next")}
             </button>
           </div>
         </div>
@@ -367,28 +369,28 @@ export default function Invoices({
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Invoice #
+                  {t("invoicing.invoice")} #
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  {t("common.status")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
+                  {t("invoicing.customer")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Company
+                  {t("invoicing.company")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Issue Date
+                  {t("invoicing.issueDate")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Due Date
+                  {t("invoicing.dueDate")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Currency
+                  {t("invoicing.currency")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {t("common.actions")}
                 </th>
               </tr>
             </thead>
@@ -396,13 +398,13 @@ export default function Invoices({
               {filteredInvoices.map((invoice) => (
                 <tr key={invoice.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {invoice.serialNumber || "Draft"}
+                    {invoice.serialNumber || t("invoicing.states.draft")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStateColor(invoice.state)}`}
                     >
-                      {invoice.state}
+                      {t(`invoicing.states.${invoice.state}`)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -426,7 +428,7 @@ export default function Invoices({
                         href={`/invoices/${invoice.id}`}
                         className="text-blue-600 hover:text-blue-900"
                       >
-                        View
+                        {t("common.view")}
                       </Link>
                       {invoice.state === "draft" && (
                         <>
@@ -434,25 +436,25 @@ export default function Invoices({
                             href={`/invoices/${invoice.id}/edit`}
                             className="text-blue-600 hover:text-blue-900"
                           >
-                            Edit
+                            {t("common.edit")}
                           </Link>
                           <button
                             onClick={() => handleFinalize(invoice.id)}
                             className="text-green-600 hover:text-green-900"
                           >
-                            Finalize
+                            {t("invoicing.finalize")}
                           </button>
                           <button
                             onClick={() => handleCancel(invoice.id)}
                             className="text-orange-600 hover:text-orange-900"
                           >
-                            Cancel
+                            {t("common.cancel")}
                           </button>
                           <button
                             onClick={() => handleDelete(invoice.id)}
                             className="text-red-600 hover:text-red-900"
                           >
-                            Delete
+                            {t("common.delete")}
                           </button>
                         </>
                       )}
@@ -467,14 +469,14 @@ export default function Invoices({
             <div className="text-center py-8 text-gray-500">
               <div className="flex items-center justify-center space-x-2">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-                <span>Loading invoices...</span>
+                <span>{t("invoicing.loadingInvoicesText")}</span>
               </div>
             </div>
           )}
 
           {!loading && filteredInvoices.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              No {filter !== "all" ? filter : ""} invoices found.
+              {filter !== "all" ? t("invoicing.noFilteredInvoicesFound", { filter: t(`invoicing.states.${filter}`) }) : t("invoicing.noInvoicesFound")}
             </div>
           )}
         </div>

@@ -8,23 +8,26 @@ import {
   InvoicesListView,
 } from "../../ash_rpc";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
+import { getI18n } from "../../lib/i18n";
 
 // Type for paginated invoice data from backend
-type PaginatedInvoices = {
-  results: InvoicesListView;
-  hasMore: boolean;
-  previousPage?: string;
-  nextPage?: string;
-  count?: number | null;
-  type: "keyset";
-} | {
-  results: InvoicesListView;
-  hasMore: boolean;
-  limit: number;
-  offset: number;
-  count?: number | null;
-  type: "offset";
-};
+type PaginatedInvoices =
+  | {
+      results: InvoicesListView;
+      hasMore: boolean;
+      previousPage?: string;
+      nextPage?: string;
+      count?: number | null;
+      type: "keyset";
+    }
+  | {
+      results: InvoicesListView;
+      hasMore: boolean;
+      limit: number;
+      offset: number;
+      count?: number | null;
+      type: "offset";
+    };
 
 interface InvoicesOffsetPageProps {
   current_user_id: string;
@@ -54,16 +57,17 @@ export default function InvoicesOffset({
   limit = "10",
   filter_state = "all",
 }: InvoicesOffsetPageProps) {
+  const { t } = getI18n(locale);
   const [error, setError] = useState<string | null>(null);
   const invoices = initialInvoices.results;
   const filter = filter_state as "all" | "draft" | "finalized" | "cancelled";
-  
+
   const offsetNum = parseInt(offset);
   const limitNum = parseInt(limit);
   const currentPage = Math.floor(offsetNum / limitNum) + 1;
   const totalCount = initialInvoices.count || 0;
   const totalPages = Math.ceil(totalCount / limitNum);
-  
+
   const pagination: OffsetPaginationInfo = {
     currentPage,
     totalPages,
@@ -77,7 +81,7 @@ export default function InvoicesOffset({
   const handleFinalize = async (id: string) => {
     if (
       confirm(
-        "Are you sure you want to finalize this invoice? This action cannot be undone.",
+        t("invoicing.confirmFinalizeInvoice"),
       )
     ) {
       try {
@@ -88,14 +92,14 @@ export default function InvoicesOffset({
         });
         window.location.reload();
       } catch (err) {
-        setError("Failed to finalize invoice");
+        setError(t("invoicing.failedToFinalizeInvoice"));
         console.error(err);
       }
     }
   };
 
   const handleCancel = async (id: string) => {
-    if (confirm("Are you sure you want to cancel this invoice?")) {
+    if (confirm(t("invoicing.confirmCancelInvoice"))) {
       try {
         await cancelInvoice({
           primaryKey: id,
@@ -104,14 +108,14 @@ export default function InvoicesOffset({
         });
         window.location.reload();
       } catch (err) {
-        setError("Failed to cancel invoice");
+        setError(t("invoicing.failedToCancelInvoice"));
         console.error(err);
       }
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this draft invoice?")) {
+    if (confirm(t("invoicing.confirmDeleteInvoice"))) {
       try {
         await deleteInvoice({
           primaryKey: id,
@@ -119,7 +123,7 @@ export default function InvoicesOffset({
         });
         window.location.reload();
       } catch (err) {
-        setError("Failed to delete invoice");
+        setError(t("invoicing.failedToDeleteInvoice"));
         console.error(err);
       }
     }
@@ -149,17 +153,17 @@ export default function InvoicesOffset({
     limit?: number;
   }) => {
     const urlParams = new URLSearchParams();
-    
+
     const filterValue = newParams.filter || filter;
     if (filterValue && filterValue !== "all") {
       urlParams.set("filter_state", filterValue);
     }
-    
+
     const offsetValue = newParams.offset ?? offsetNum;
     if (offsetValue > 0) {
       urlParams.set("offset", offsetValue.toString());
     }
-    
+
     const limitValue = newParams.limit ?? limitNum;
     if (limitValue !== 10) {
       urlParams.set("limit", limitValue.toString());
@@ -174,7 +178,7 @@ export default function InvoicesOffset({
     const maxVisible = 5;
     let startPage = Math.max(1, pagination.currentPage - 2);
     let endPage = Math.min(pagination.totalPages, startPage + maxVisible - 1);
-    
+
     if (endPage - startPage < maxVisible - 1) {
       startPage = Math.max(1, endPage - maxVisible + 1);
     }
@@ -182,30 +186,27 @@ export default function InvoicesOffset({
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
-    
+
     return pages;
   };
-
-  // Since we're using pagination, we display all fetched invoices (they're already filtered)
-  const filteredInvoices = invoices;
 
   return (
     <InvoicingLayout locale={locale}>
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Invoices (Offset Pagination)</h1>
+          <h1 className="text-3xl font-bold">{t("invoicing.invoices")} ({t("invoicing.offsetPagination")})</h1>
           <div className="flex gap-2">
             <Link
               href="/invoices"
               className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
             >
-              Keyset Version
+              {t("invoicing.keysetVersion")}
             </Link>
             <Link
               href="/invoices/new"
               className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
             >
-              New Invoice
+              {t("invoicing.newInvoice")}
             </Link>
           </div>
         </div>
@@ -221,7 +222,9 @@ export default function InvoicesOffset({
             <Link
               href={buildUrl({ filter: "all", offset: 0 })}
               className={`px-3 py-1 rounded ${
-                filter === "all" ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-gray-300"
+                filter === "all"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 hover:bg-gray-300"
               }`}
             >
               All
@@ -229,7 +232,9 @@ export default function InvoicesOffset({
             <Link
               href={buildUrl({ filter: "draft", offset: 0 })}
               className={`px-3 py-1 rounded ${
-                filter === "draft" ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-gray-300"
+                filter === "draft"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 hover:bg-gray-300"
               }`}
             >
               Draft
@@ -237,7 +242,9 @@ export default function InvoicesOffset({
             <Link
               href={buildUrl({ filter: "finalized", offset: 0 })}
               className={`px-3 py-1 rounded ${
-                filter === "finalized" ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-gray-300"
+                filter === "finalized"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 hover:bg-gray-300"
               }`}
             >
               Finalized
@@ -245,17 +252,24 @@ export default function InvoicesOffset({
             <Link
               href={buildUrl({ filter: "cancelled", offset: 0 })}
               className={`px-3 py-1 rounded ${
-                filter === "cancelled" ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-gray-300"
+                filter === "cancelled"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 hover:bg-gray-300"
               }`}
             >
               Cancelled
             </Link>
           </div>
-          
+
           {/* Pagination info */}
           <div className="flex gap-2 items-center text-sm text-gray-500">
             <span>
-              Showing {pagination.offset + 1}-{Math.min(pagination.offset + invoices.length, pagination.totalCount)} of {pagination.totalCount} invoices
+              Showing {pagination.offset + 1}-
+              {Math.min(
+                pagination.offset + invoices.length,
+                pagination.totalCount,
+              )}{" "}
+              of {pagination.totalCount} invoices
             </span>
           </div>
         </div>
@@ -294,7 +308,7 @@ export default function InvoicesOffset({
               {invoices.map((invoice) => (
                 <tr key={invoice.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {invoice.serialNumber || "Draft"}
+                    {invoice.serialNumber || t("invoicing.states.draft")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
@@ -374,19 +388,21 @@ export default function InvoicesOffset({
             <div className="flex gap-2">
               {pagination.hasPrev ? (
                 <Link
-                  href={buildUrl({ offset: Math.max(0, pagination.offset - pagination.limit) })}
+                  href={buildUrl({
+                    offset: Math.max(0, pagination.offset - pagination.limit),
+                  })}
                   className="px-3 py-1 rounded bg-gray-500 text-white hover:bg-gray-600"
                 >
-                  ← Previous
+                  {t("invoicing.previous")}
                 </Link>
               ) : (
                 <span className="px-3 py-1 rounded bg-gray-200 text-gray-400 cursor-not-allowed">
-                  ← Previous
+                  {t("invoicing.previous")}
                 </span>
               )}
-              
+
               {/* Page numbers */}
-              {generatePageNumbers().map((page) => (
+              {generatePageNumbers().map((page) =>
                 page === pagination.currentPage ? (
                   <span
                     key={page}
@@ -402,25 +418,27 @@ export default function InvoicesOffset({
                   >
                     {page}
                   </Link>
-                )
-              ))}
-              
+                ),
+              )}
+
               {pagination.hasNext ? (
                 <Link
-                  href={buildUrl({ offset: pagination.offset + pagination.limit })}
+                  href={buildUrl({
+                    offset: pagination.offset + pagination.limit,
+                  })}
                   className="px-3 py-1 rounded bg-gray-500 text-white hover:bg-gray-600"
                 >
-                  Next →
+                  {t("invoicing.next")}
                 </Link>
               ) : (
                 <span className="px-3 py-1 rounded bg-gray-200 text-gray-400 cursor-not-allowed">
-                  Next →
+                  {t("invoicing.next")}
                 </span>
               )}
             </div>
-            
+
             <div className="text-sm text-gray-500">
-              Page {pagination.currentPage} of {pagination.totalPages}
+              {t("invoicing.page", { current: pagination.currentPage, total: pagination.totalPages })}
             </div>
           </div>
         )}

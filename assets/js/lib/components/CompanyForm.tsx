@@ -1,6 +1,7 @@
 import React from "react";
 import InputField from "./InputField";
 import CheckboxInput from "./CheckboxInput";
+import { getI18n } from "../i18n";
 
 export interface CompanyFormData {
   name: string;
@@ -35,6 +36,7 @@ interface CompanyFormProps {
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
   isEditing: boolean;
+  locale: string;
 }
 
 export default function CompanyForm({
@@ -44,18 +46,20 @@ export default function CompanyForm({
   onSubmit,
   onCancel,
   isEditing,
+  locale,
 }: CompanyFormProps) {
+  const { t } = getI18n(locale);
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <h2 className="text-xl font-semibold mb-4">
-        {isEditing ? "Edit Company" : "New Company"}
+        {isEditing ? t("invoicing.editCompany") : t("invoicing.addCompany")}
       </h2>
       <form
         onSubmit={onSubmit}
         className="grid grid-cols-1 md:grid-cols-2 gap-4"
       >
         <InputField
-          label="Company Name"
+          label={t("invoicing.companyName")}
           value={formData.name}
           onChange={(value) => onChange({ ...formData, name: value })}
           errors={fieldErrors?.name}
@@ -63,7 +67,7 @@ export default function CompanyForm({
         />
 
         <InputField
-          label="Email"
+          label={t("common.email")}
           type="email"
           value={formData.email}
           onChange={(value) => onChange({ ...formData, email: value })}
@@ -71,7 +75,7 @@ export default function CompanyForm({
         />
 
         <InputField
-          label="Address Line 1"
+          label={t("invoicing.addressLine1")}
           value={formData.addressLine1}
           onChange={(value) => onChange({ ...formData, addressLine1: value })}
           errors={fieldErrors?.addressLine1}
@@ -79,14 +83,14 @@ export default function CompanyForm({
         />
 
         <InputField
-          label="Address Line 2"
+          label={t("invoicing.addressLine2")}
           value={formData.addressLine2}
           onChange={(value) => onChange({ ...formData, addressLine2: value })}
           errors={fieldErrors?.addressLine2}
         />
 
         <InputField
-          label="City"
+          label={t("forms.city")}
           value={formData.city}
           onChange={(value) => onChange({ ...formData, city: value })}
           errors={fieldErrors?.city}
@@ -94,7 +98,7 @@ export default function CompanyForm({
         />
 
         <InputField
-          label="Postal Code"
+          label={t("forms.postalCode")}
           value={formData.postalCode}
           onChange={(value) => onChange({ ...formData, postalCode: value })}
           errors={fieldErrors?.postalCode}
@@ -102,7 +106,7 @@ export default function CompanyForm({
         />
 
         <InputField
-          label="Country"
+          label={t("forms.country")}
           value={formData.country}
           onChange={(value) => onChange({ ...formData, country: value })}
           errors={fieldErrors?.country}
@@ -110,14 +114,14 @@ export default function CompanyForm({
         />
 
         <InputField
-          label="VAT Number"
+          label={t("invoicing.vatNumber")}
           value={formData.vatNumber}
           onChange={(value) => onChange({ ...formData, vatNumber: value })}
           errors={fieldErrors?.vatNumber}
         />
 
         <InputField
-          label="Phone"
+          label={t("invoicing.phone")}
           type="tel"
           value={formData.phone}
           onChange={(value) => onChange({ ...formData, phone: value })}
@@ -125,7 +129,7 @@ export default function CompanyForm({
         />
 
         <CheckboxInput
-          label="Set as default company"
+          label={t("invoicing.isDefault")}
           checked={formData.isDefault}
           onChange={(checked) => onChange({ ...formData, isDefault: checked })}
           errors={fieldErrors?.isDefault}
@@ -137,14 +141,14 @@ export default function CompanyForm({
             type="submit"
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
           >
-            {isEditing ? "Update" : "Create"} Company
+            {isEditing ? t("invoicing.updateCompany") : t("invoicing.createCompany")}
           </button>
           <button
             type="button"
             onClick={onCancel}
             className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
           >
-            Cancel
+            {t("common.cancel")}
           </button>
         </div>
       </form>

@@ -17,6 +17,7 @@ import InvoiceForm, {
 } from "../../lib/components/InvoiceForm";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
 import { useAshRpcForm } from "../../lib/useAshRpcForm";
+import { getI18n } from "../../lib/i18n";
 
 interface NewInvoicePageProps {
   current_user_id: string;
@@ -52,6 +53,7 @@ const customerFields = [
 ] satisfies ListActiveCustomersFields;
 
 export default function NewInvoice({ locale }: NewInvoicePageProps) {
+  const { t } = getI18n(locale);
   const [companies, setCompanies] = useState<CompanyType[]>([]);
   const [customers, setCustomers] = useState<CustomerType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -142,7 +144,7 @@ export default function NewInvoice({ locale }: NewInvoicePageProps) {
       setCustomers(customersResult.data);
       setError(null);
     } catch (err) {
-      setError("Failed to load data");
+      setError(t("invoicing.failedToLoadData"));
       console.error(err);
     } finally {
       setLoading(false);
@@ -157,7 +159,7 @@ export default function NewInvoice({ locale }: NewInvoicePageProps) {
     return (
       <InvoicingLayout locale={locale}>
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-lg">Loading...</div>
+          <div className="text-lg">{t("common.loading")}</div>
         </div>
       </InvoicingLayout>
     );
@@ -174,7 +176,7 @@ export default function NewInvoice({ locale }: NewInvoicePageProps) {
             onClick={loadData}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
           >
-            Retry
+            {t("invoicing.retry")}
           </button>
         </div>
       </InvoicingLayout>
@@ -192,6 +194,7 @@ export default function NewInvoice({ locale }: NewInvoicePageProps) {
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         isEditing={false}
+        locale={locale}
       />
     </InvoicingLayout>
   );

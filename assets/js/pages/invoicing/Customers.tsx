@@ -7,6 +7,7 @@ import {
   CustomersListView,
 } from "../../ash_rpc";
 import InvoicingLayout from "../../lib/components/InvoicingLayout";
+import { getI18n } from "../../lib/i18n";
 
 interface CustomersPageProps {
   current_user_id: string;
@@ -19,12 +20,15 @@ export default function Customers({
   customers: initialCustomers,
   locale,
 }: CustomersPageProps) {
+  const { t } = getI18n(locale);
   const [error, setError] = useState<string | null>(null);
 
   const handleDeactivate = async (customer: CustomersListView[number]) => {
     if (
       confirm(
-        `Are you sure you want to ${customer.isActive ? "deactivate" : "activate"} this customer?`,
+        customer.isActive 
+          ? t("invoicing.confirmDeactivateCustomer")
+          : t("invoicing.confirmActivateCustomer")
       )
     ) {
       try {
@@ -51,7 +55,9 @@ export default function Customers({
         window.location.reload();
       } catch (err) {
         setError(
-          `Failed to ${customer.isActive ? "deactivate" : "activate"} customer`,
+          customer.isActive 
+            ? t("invoicing.failedToDeactivateCustomer")
+            : t("invoicing.failedToActivateCustomer")
         );
         console.error(err);
       }
@@ -62,12 +68,12 @@ export default function Customers({
     <InvoicingLayout locale={locale}>
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Customers</h1>
+          <h1 className="text-3xl font-bold">{t("invoicing.customers")}</h1>
           <Link
             href="/customers/new"
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
           >
-            Add Customer
+            {t("invoicing.addCustomer")}
           </Link>
         </div>
 
@@ -89,7 +95,7 @@ export default function Customers({
                       : "bg-gray-100 text-gray-800"
                   }`}
                 >
-                  {customer.isActive ? "Active" : "Inactive"}
+                  {customer.isActive ? t("common.active") : t("common.inactive")}
                 </span>
               </div>
               <div className="text-sm text-gray-600 space-y-1">
@@ -99,16 +105,16 @@ export default function Customers({
                   {customer.city} {customer.postalCode}
                 </p>
                 <p>{customer.country}</p>
-                {customer.vatNumber && <p>VAT: {customer.vatNumber}</p>}
-                {customer.email && <p>Email: {customer.email}</p>}
-                {customer.phone && <p>Phone: {customer.phone}</p>}
+                {customer.vatNumber && <p>{t("invoicing.vatNumber")}: {customer.vatNumber}</p>}
+                {customer.email && <p>{t("common.email")}: {customer.email}</p>}
+                {customer.phone && <p>{t("invoicing.phone")}: {customer.phone}</p>}
               </div>
               <div className="mt-4 flex gap-2">
                 <Link
                   href={`/customers/${customer.id}/edit`}
                   className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                 >
-                  Edit
+                  {t("common.edit")}
                 </Link>
                 <button
                   onClick={() => handleDeactivate(customer)}
@@ -118,7 +124,7 @@ export default function Customers({
                       : "text-green-600 hover:text-green-800"
                   }`}
                 >
-                  {customer.isActive ? "Deactivate" : "Activate"}
+                  {customer.isActive ? t("invoicing.deactivate") : t("invoicing.activate")}
                 </button>
               </div>
             </div>
@@ -127,8 +133,7 @@ export default function Customers({
 
         {initialCustomers.length === 0 && (
           <div className="text-center py-8 text-gray-500">
-            No active customers found. Click "Add Customer" to create your first
-            customer.
+            {t("invoicing.noCustomersFound")}
           </div>
         )}
       </div>
