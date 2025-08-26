@@ -4,6 +4,16 @@ A comprehensive demonstration of the **ash_typescript** extension for the Ash Fr
 
 ## 🚀 Getting Started
 
+### Prerequisites
+
+This project uses [mise-en-place](https://mise.jdx.dev/) to manage runtime dependencies. Install mise first, then:
+
+```bash
+mise install  # Installs all required runtimes (Elixir, Node.js, etc.)
+```
+
+### Setup
+
 1. Run `mix setup`
 2. Start with `iex -S mix phx.server`
 3. Visit http://localhost:5173
