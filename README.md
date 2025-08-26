@@ -100,14 +100,14 @@ mise install  # Installs all required runtimes (Elixir, Node.js, etc.)
 
 ## 🔧 Key Files to Explore
 
-- `assets/js/ash_rpc.ts` - Generated TypeScript definitions
-- `assets/js/lib/useAshRpcForm.tsx` - Reusable form abstraction  
-- `assets/js/pages/invoicing/Invoices.tsx` - Keyset pagination + filtering
-- `assets/js/pages/invoicing/InvoicesOffset.tsx` - Offset pagination
-- `assets/js/pages/invoicing/Companies.tsx` - Client-side loading patterns
-- `assets/js/pages/invoicing/EditInvoice.tsx` - Complex form with useAshRpcForm
-- `lib/ash_typescript_react_example/invoicing.ex` - Ash domain definition with typed queries and RPC actions
-- `lib/ash_typescript_react_example_web/controllers/invoicing_controller.ex` - Phoenix controller using typed queries
+- [`assets/js/ash_rpc.ts`](assets/js/ash_rpc.ts) - Generated TypeScript definitions
+- [`assets/js/lib/useAshRpcForm.tsx`](assets/js/lib/useAshRpcForm.tsx) - Reusable form abstraction  
+- [`assets/js/pages/invoicing/Invoices.tsx`](assets/js/pages/invoicing/Invoices.tsx) - Keyset pagination + filtering
+- [`assets/js/pages/invoicing/InvoicesOffset.tsx`](assets/js/pages/invoicing/InvoicesOffset.tsx) - Offset pagination
+- [`assets/js/pages/invoicing/Companies.tsx`](assets/js/pages/invoicing/Companies.tsx) - Client-side loading patterns
+- [`assets/js/pages/invoicing/EditInvoice.tsx`](assets/js/pages/invoicing/EditInvoice.tsx) - Complex form with useAshRpcForm
+- [`lib/ash_typescript_react_example/invoicing.ex`](lib/ash_typescript_react_example/invoicing.ex) - Ash domain definition with typed queries and RPC actions
+- [`lib/ash_typescript_react_example_web/controllers/invoicing_controller.ex`](lib/ash_typescript_react_example_web/controllers/invoicing_controller.ex) - Phoenix controller using typed queries
 
 ## 🌟 Why ash_typescript?
 
