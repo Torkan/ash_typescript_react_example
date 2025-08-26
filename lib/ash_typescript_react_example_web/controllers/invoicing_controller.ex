@@ -140,8 +140,6 @@ defmodule AshTypescriptReactExampleWeb.InvoicingController do
         conn
       )
 
-    IO.inspect(invoices_result)
-
     invoices =
       case invoices_result do
         %{"success" => true, "data" => data} -> data
@@ -366,7 +364,6 @@ defmodule AshTypescriptReactExampleWeb.InvoicingController do
         _ -> []
       end
 
-    IO.inspect(invoices_result)
     # For offset pagination, we need to get total count
     # This is a simplified approach - in real apps you might want to optimize this
     total_count_result =
