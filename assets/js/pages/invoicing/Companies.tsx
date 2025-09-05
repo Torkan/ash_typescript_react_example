@@ -30,6 +30,11 @@ const companyFields = [
   "isDefault",
 ] satisfies ListCompaniesFields;
 
+export type SuccessData<T extends (...args: any[]) => Promise<any>> = Extract<
+  Awaited<ReturnType<T>>,
+  { success: true }
+>["data"];
+
 // Helper function to fetch companies with proper typing
 async function fetchCompanies() {
   return await listCompanies({
@@ -44,12 +49,7 @@ async function fetchCompanies() {
 export default function Companies({ locale }: CompaniesPageProps) {
   const { t } = getI18n(locale);
   const [companies, setCompanies] = useState<
-    Array<
-      Extract<
-        ListCompaniesResult<typeof companyFields>,
-        { success: true }
-      >["data"]["results"][0]
-    >
+    SuccessData<typeof fetchCompanies>["results"]
   >([]);
 
   const [loading, setLoading] = useState(true);
